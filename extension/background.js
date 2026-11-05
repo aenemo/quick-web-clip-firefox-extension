@@ -1,0 +1,108 @@
+import { runClip } from "./lib/clip.js";
+import { buildMenuModel, normaliseSettings } from "./lib/settings.js";
+import { localDate } from "./lib/dates.js";
+
+const NATIVE_HOST = "obsidian_quick_clip";
+const PARENT_MENU_ID = "oqc-save-to";
+const DEST_PREFIX = "dest:";
+
+const BADGES = {
+  working: { text: "...", color: "#1565c0" },
+  ok: { text: "OK", color: "#2e7d32" },
+  warning: { text: "!", color: "#f9a825" },
+  error: { text: "ERR", color: "#c62828" },
+};
+
+const badgeState = new Map();
+
+async function setBadge(tabId, state) {
+  const b = BADGES[state];
+  badgeState.set(tabId, state);
+  await browser.action.setBadgeText({ tabId, text: b.text });
+  await browser.action.setBadgeBackgroundColor({ tabId, color: b.color });
+  if (state === "ok") {
+    setTimeout(() => {
+      // Only clear if no newer state has replaced OK on this tab.
+      if (badgeState.get(tabId) !== "ok") return;
+      badgeState.delete(tabId);
+      browser.action.setBadgeText({ tabId, text: "" }).catch(() => {});
+    }, 2000);
+  }
+}
+
+async function extract(tabId) {
+  await browser.scripting.executeScript({
+    target: { tabId },
+    files: [
+      "vendor/Readability.js",
+      "vendor/turndown.js",
+      "vendor/turndown-plugin-gfm.js",
+      "content/extract.js",
+    ],
+  });
+  const results = await browser.scripting.executeScript({
+    target: { tabId },
+    func: () => window.__oqcExtract(),
+  });
+  return results[0].result;
+}
+
+const deps = {
+  getSettings: () => browser.storage.local.get(null),
+  openOptions: () => browser.runtime.openOptionsPage(),
+  extract,
+  sendNative: (msg) => browser.runtime.sendNativeMessage(NATIVE_HOST, msg),
+  setBadge,
+  notify: (message) =>
+    browser.notifications.create({
+      type: "basic",
+      title: "Obsidian Quick Clip",
+      message,
+      iconUrl: "icons/icon-96.png",
+    }),
+  today: () => localDate(),
+};
+
+function clip(tab, destinationId = null) {
+  if (!tab || tab.id == null) return Promise.resolve();
+  return runClip({ tab, destinationId }, deps);
+}
+
+async function activeTab() {
+  const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
+  return tab;
+}
+
+async function rebuildMenus() {
+  await browser.menus.removeAll();
+  const settings = normaliseSettings(await browser.storage.local.get(null));
+  if (settings.destinations.length === 0) return;
+  browser.menus.create({ id: PARENT_MENU_ID, title: "Save to", contexts: ["page", "action"] });
+  for (const item of buildMenuModel(settings)) {
+    browser.menus.create({
+      id: item.id,
+      parentId: PARENT_MENU_ID,
+      title: item.title,
+      contexts: ["page", "action"],
+    });
+  }
+}
+
+browser.action.onClicked.addListener((tab) => clip(tab));
+
+browser.commands.onCommand.addListener(async (name) => {
+  if (name !== "clip-default") return;
+  clip(await activeTab());
+});
+
+browser.menus.onClicked.addListener((info, tab) => {
+  const id = String(info.menuItemId);
+  if (!id.startsWith(DEST_PREFIX)) return;
+  clip(tab, id.slice(DEST_PREFIX.length));
+});
+
+browser.storage.onChanged.addListener(() => {
+  rebuildMenus().catch(() => {});
+});
+
+rebuildMenus().catch(() => {});
