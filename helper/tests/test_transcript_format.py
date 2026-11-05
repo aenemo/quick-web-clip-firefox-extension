@@ -73,15 +73,39 @@ def test_parse_vtt_manual():
     assert cues[1].start == 4.2
 
 
-@pytest.mark.parametrize("name,fmt", [("auto_rolling.json3", "json3"), ("auto_rolling.vtt", "vtt")])
-def test_parse_auto_removes_rolling_duplicates(name, fmt):
+AUTO_VTT_EXPECTED = [
+    (0.0, "welcome to the channel"),
+    (2.01, "today we are building a"),
+    (4.11, "small garden shed from timber"),
+    (6.51, "you will need a flat patch"),
+    (9.01, "of ground and a few hours"),
+    (11.51, "start by marking out the corners"),
+    (14.01, "with string and check each diagonal"),
+]
+AUTO_JSON3_EXPECTED = [
+    (0.0, "welcome to the channel"),
+    (2.0, "today we are building a"),
+    (4.1, "small garden shed from timber"),
+    (6.5, "you will need a flat patch"),
+    (9.0, "of ground and a few hours"),
+    (11.5, "start by marking out the corners"),
+    (14.0, "with string and check each diagonal"),
+    (16.5, "so the frame stays square"),
+    (19.0, "now cut the base boards to length"),
+    (21.5, "and screw them down firmly"),
+]
+
+
+@pytest.mark.parametrize("name,fmt,expected", [
+    ("auto_rolling.json3", "json3", AUTO_JSON3_EXPECTED),
+    ("auto_rolling.vtt", "vtt", AUTO_VTT_EXPECTED),
+])
+def test_parse_auto_removes_rolling_duplicates(name, fmt, expected):
     cues = parse_captions(load(name), fmt)
-    assert cues[0] == Cue(0.0, "welcome to the channel")
+    assert [(c.start, c.text) for c in cues] == expected
     joined = " ".join(c.text for c in cues)
-    assert "<" not in joined
+    assert joined == " ".join(text for _, text in expected)
     assert not has_adjacent_repeat(joined)
-    assert joined.startswith("welcome to the channel today we are building a small garden shed")
-    assert all(c.text for c in cues)
 
 
 def make_cues(n, step=10.0, punct_every=None):
