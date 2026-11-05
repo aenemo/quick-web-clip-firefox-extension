@@ -222,3 +222,24 @@ test("throwing notify does not change a warning result", async () => {
   assert.equal(r.status, "warning");
   assert.deepEqual(calls.badge.at(-1), [7, "warning"]);
 });
+
+test("stale canonical on a video tab uses the live tab URL", async () => {
+  const tabUrl = "https://www.youtube.com/watch?v=second";
+  const stale = "https://www.youtube.com/watch?v=first";
+  const { deps, calls } = makeDeps({
+    extract: async () => ({ page: { url: stale, title: "V" }, ogType: null, bodyMarkdown: "" }),
+  });
+  await runClip({ tab: { id: 3, url: tabUrl } }, deps);
+  assert.equal(calls.native[0].kind, "video");
+  assert.equal(calls.native[0].page.url, tabUrl);
+});
+
+test("article page keeps its canonical URL", async () => {
+  const canonical = "https://example.com/canonical-post";
+  const { deps, calls } = makeDeps({
+    extract: async () => ({ page: { url: canonical, title: "P" }, ogType: "article", bodyMarkdown: "" }),
+  });
+  await runClip({ tab: { id: 4, url: "https://example.com/post?utm=1" } }, deps);
+  assert.equal(calls.native[0].kind, "article");
+  assert.equal(calls.native[0].page.url, canonical);
+});

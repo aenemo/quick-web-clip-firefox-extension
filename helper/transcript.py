@@ -236,9 +236,22 @@ def select_track(info: dict) -> tuple[str, str, str] | None:
     return None
 
 
+_ANSI = re.compile(r"\x1b\[[0-9;]*m")
+_REASON_MAX = 160
+
+
 def _short(exc: BaseException) -> str:
-    lines = str(exc).strip().splitlines()
-    return (lines[0].strip() if lines else "")[:200] or type(exc).__name__
+    text = _ANSI.sub("", str(exc)).strip()
+    lines = text.splitlines()
+    first = lines[0].strip() if lines else ""
+    if first.startswith("ERROR: "):
+        first = first[len("ERROR: "):].strip()
+    if len(first) > _REASON_MAX:
+        cut = first[:_REASON_MAX]
+        if first[_REASON_MAX] != " " and " " in cut:
+            cut = cut.rsplit(" ", 1)[0]
+        first = cut.rstrip(" ,;:") + "..."
+    return first or type(exc).__name__
 
 
 def _fetch(url: str, ydl_factory) -> VideoInfo:
@@ -263,6 +276,8 @@ def _fetch(url: str, ydl_factory) -> VideoInfo:
             except Exception as exc:
                 raise VideoError(f"could not download captions: {_short(exc)[:170]}") from exc
             transcript = kind if cues else "none"
+        elif info.get("extractor_key") == "Generic":
+            raise Unsupported("not a video page")
     upload = info.get("upload_date") or ""
     published = f"{upload[:4]}-{upload[4:6]}-{upload[6:8]}" if len(upload) == 8 and upload.isdigit() else None
     duration = info.get("duration")
@@ -293,7 +308,7 @@ def fetch_video(url: str, timeout: float = 60, ydl_factory=None) -> VideoInfo:
         return future.result(timeout=timeout)
     except concurrent.futures.TimeoutError:
         raise VideoError(f"timed out after {TIMEOUT_SECONDS} seconds") from None
-    except VideoError:
+    except (VideoError, Unsupported):
         raise
     except ydl_utils.UnsupportedError as exc:
         raise Unsupported(_short(exc)) from exc

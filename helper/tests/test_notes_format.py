@@ -19,7 +19,7 @@ def test_make_filename_positions():
 def test_make_filename_strips_illegal():
     title = 'a<b>c:d"e/f' + chr(92) + 'g|h?i*j'
     assert make_filename(title, "2026-11-05", "none") == "a b c d e f g h i j"
-    assert make_filename("a\x00b\x1fc\x7fd", "2026-11-05", "none") == "abcd"
+    assert make_filename("a\x00b\x1fc\x7fd", "2026-11-05", "none") == "a b c d"
 
 
 def test_make_filename_trims_to_100():
@@ -64,3 +64,8 @@ def test_frontmatter_newlines_and_unicode():
 def test_frontmatter_backslash_and_empty():
     out = render_frontmatter([("p", "a" + chr(92) + "b"), ("e", "")])
     assert out == '---\np: "a' + chr(92) * 2 + 'b"\n---\n'
+
+
+def test_control_characters_become_spaces():
+    assert make_filename("Foo\nBar", "2026-11-05", "none") == "Foo Bar"
+    assert make_filename("Foo\tBar\x00Baz", "2026-11-05", "none") == "Foo Bar Baz"

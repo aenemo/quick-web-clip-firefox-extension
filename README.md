@@ -62,6 +62,8 @@ Video sites change often. If transcripts stop working, update yt-dlp:
 helper\venv\Scripts\python.exe -m pip install -U yt-dlp
 ```
 
+yt-dlp may warn that no JavaScript runtime is installed. Installing deno (https://deno.com) is optional but recommended for YouTube.
+
 ## Uninstall
 
 ```
@@ -125,6 +127,7 @@ These checks have not been run yet. They need a real Firefox, which could not be
 | YouTube Short | Open a `youtube.com/shorts/` URL, press Alt+Shift+C | Note saved as a video note | | |
 | YouTube watch URL with list | Open a `watch?v=...&list=...` URL, press Alt+Shift+C | Video note for that video only, links without the `list` parameter | | |
 | Vimeo video | Open a Vimeo video page, press Alt+Shift+C | Note saved. If Vimeo blocks yt-dlp, amber `!` and a "Saved without transcript" notification | | |
+| YouTube in-page navigation | Open a video, click another video in the sidebar, press Alt+Shift+C | The note is for the second video | | |
 | Missing vault folder | Set a destination to a folder that does not exist, clip a page | Red `ERR` and notification "Folder not found: <path>" | | |
 | Helper not installed | Run `helper\uninstall.bat`, clip a page, then run `helper\install.bat` again | Red `ERR` and notification "Helper not found. Run install.bat in the helper folder." | | |
 | about: page | Open `about:preferences`, press Alt+Shift+C | Notification "This page can't be clipped" | | |

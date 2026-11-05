@@ -14,7 +14,7 @@ _MAX_TITLE = 100
 
 
 def _clean_title(title: str) -> str:
-    title = _CONTROL.sub("", title or "")
+    title = _CONTROL.sub(" ", title or "")
     title = _ILLEGAL.sub(" ", title)
     title = _WHITESPACE.sub(" ", title).strip()
     title = title[:_MAX_TITLE].rstrip(" .")

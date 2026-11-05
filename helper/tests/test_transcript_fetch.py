@@ -8,7 +8,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import pytest
 import yt_dlp.utils
 
-from transcript import Unsupported, VideoError, VideoInfo, fetch_video, parse_captions, select_track
+from transcript import Unsupported, VideoError, VideoInfo, _short, fetch_video, parse_captions, select_track
 
 FIX = Path(__file__).parent / "fixtures"
 URL = "https://www.youtube.com/watch?v=abc123"
@@ -140,3 +140,29 @@ def test_caption_parse_failure():
     with pytest.raises(VideoError) as ei:
         fetch_video(URL, ydl_factory=factory(info=base_info(subtitles=MANUAL), data=b"not json"))
     assert ei.value.reason.startswith("could not download captions: ")
+
+
+def test_short_strips_error_prefix_and_ansi():
+    assert _short(RuntimeError("ERROR: boom")) == "boom"
+    ansi = "\x1b[0;31mERROR:\x1b[0m boom \x1b[1mbold\x1b[0m"
+    assert _short(RuntimeError(ansi)) == "boom bold"
+    assert _short(RuntimeError("ERROR: first\nsecond")) == "first"
+
+
+def test_short_truncates_at_word_boundary():
+    msg = "ERROR: [vimeo] 76979871: " + " ".join(["word"] * 60)
+    out = _short(RuntimeError(msg))
+    assert out.endswith("...")
+    body = out[:-3]
+    assert len(out) <= 163
+    assert body.endswith("word") and not body.endswith(" ")
+    assert msg[len("ERROR: "):].startswith(body)
+    assert len(_short(RuntimeError("x" * 500))) <= 163
+
+
+def test_generic_extractor_without_captions_is_unsupported():
+    with pytest.raises(Unsupported):
+        fetch_video(URL, ydl_factory=factory(info=base_info(extractor_key="Generic")))
+    data = (FIX / "manual.json3").read_bytes()
+    vi = fetch_video(URL, ydl_factory=factory(info=base_info(extractor_key="Generic", subtitles=MANUAL), data=data))
+    assert vi.transcript == "manual"
