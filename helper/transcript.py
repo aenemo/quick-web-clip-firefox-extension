@@ -187,7 +187,7 @@ def render_transcript(sections: list[Section], url: str) -> str:
 
 
 TIMEOUT_SECONDS = 60
-_log = logging.getLogger("oqc.ytdlp")
+_log = logging.getLogger("qwc.ytdlp")
 
 
 class Unsupported(Exception):

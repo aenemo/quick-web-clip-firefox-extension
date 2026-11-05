@@ -1,4 +1,4 @@
-# Obsidian Quick Clip
+# Quick Web Clip
 
 A Firefox extension that saves the current page into an Obsidian vault as a Markdown note with one action: a toolbar click or the keyboard shortcut Alt+Shift+C. There is no popup and no Save dialog. It works whether or not Obsidian is running.
 
@@ -24,7 +24,7 @@ Run once from the repository folder:
 helper\install.bat
 ```
 
-This creates `helper\venv`, installs yt-dlp into it, writes `helper\obsidian_quick_clip.json` and registers the native host under `HKCU\Software\Mozilla\NativeMessagingHosts\obsidian_quick_clip`. No administrator rights are needed.
+This creates `helper\venv`, installs yt-dlp into it, writes `helper\quick_web_clip.json` and registers the native host under `HKCU\Software\Mozilla\NativeMessagingHosts\quick_web_clip`. No administrator rights are needed.
 
 ## Load the extension (temporary)
 
@@ -52,7 +52,7 @@ Replace the two placeholders with your own credentials and never commit them. Th
 
 ### Change the shortcut
 
-Open `about:addons`, click the gear icon, choose "Manage Extension Shortcuts" and change the shortcut for Obsidian Quick Clip.
+Open `about:addons`, click the gear icon, choose "Manage Extension Shortcuts" and change the shortcut for Quick Web Clip.
 
 ## Update yt-dlp
 
@@ -112,7 +112,7 @@ These were run on 06/11/2026 by driving the installed helper (`helper\clipper_ho
 
 ### Manual checks in Firefox (not run yet)
 
-These checks have not been run yet. They need a real Firefox, which could not be driven when this README was written. Fill in the Date (DD/MM/YYYY) and Result columns as you work through them. Load the extension first and add a destination such as `C:\Temp\oqc-test` (create the folder first) with subfolder `Clippings`.
+These checks have not been run yet. They need a real Firefox, which could not be driven when this README was written. Fill in the Date (DD/MM/YYYY) and Result columns as you work through them. Load the extension first and add a destination such as `C:\Temp\qwc-test` (create the folder first) with subfolder `Clippings`.
 
 | Check | Steps | Expected | Date | Result |
 |---|---|---|---|---|

@@ -6,7 +6,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import install_host  # noqa: E402
 
-KEY_PATH = r"Software\Mozilla\NativeMessagingHosts\obsidian_quick_clip"
+KEY_PATH = r"Software\Mozilla\NativeMessagingHosts\quick_web_clip"
 
 class FakeReg:
     HKEY_CURRENT_USER = "HKCU"
@@ -32,17 +32,17 @@ class FakeReg:
 
 def test_build_manifest_fields(tmp_path):
     assert install_host.build_manifest(tmp_path) == {
-        "name": "obsidian_quick_clip",
-        "description": "Obsidian Quick Clip helper",
+        "name": "quick_web_clip",
+        "description": "Quick Web Clip helper",
         "path": str(tmp_path / "clipper_host.bat"),
         "type": "stdio",
-        "allowed_extensions": ["obsidian-quick-clip@local"],
+        "allowed_extensions": ["quick-web-clip@local"],
     }
 
 def test_install_writes_manifest_and_registry(tmp_path):
     reg = FakeReg()
     path = install_host.install(tmp_path, reg=reg)
-    assert path == tmp_path / "obsidian_quick_clip.json"
+    assert path == tmp_path / "quick_web_clip.json"
     data = json.loads(path.read_text(encoding="utf-8"))
     assert data == install_host.build_manifest(tmp_path)
     assert reg.created == [("HKCU", KEY_PATH)]
@@ -53,7 +53,7 @@ def test_uninstall_removes_key_and_file(tmp_path):
     install_host.install(tmp_path, reg=reg)
     install_host.uninstall(tmp_path, reg=reg)
     assert reg.deleted == [("HKCU", KEY_PATH)]
-    assert not (tmp_path / "obsidian_quick_clip.json").exists()
+    assert not (tmp_path / "quick_web_clip.json").exists()
 
 def test_uninstall_tolerates_missing(tmp_path):
     install_host.uninstall(tmp_path, reg=FakeReg(missing_on_delete=True))

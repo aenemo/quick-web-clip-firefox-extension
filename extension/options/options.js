@@ -7,7 +7,7 @@ import {
   validateDestination,
 } from "../lib/settings.js";
 
-const NATIVE_HOST = "obsidian_quick_clip";
+const NATIVE_HOST = "quick_web_clip";
 const HELPER_MISSING = "Helper not found. Run install.bat in the helper folder.";
 
 const el = (id) => document.getElementById(id);

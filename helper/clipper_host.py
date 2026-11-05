@@ -1,4 +1,4 @@
-"""Native messaging host for Obsidian Quick Clip."""
+"""Native messaging host for Quick Web Clip."""
 import contextlib
 import json
 import logging
@@ -13,7 +13,7 @@ import compose
 HOST_VERSION = "1.0.0"
 PROTOCOL_VERSION = 1
 
-log = logging.getLogger("oqc")
+log = logging.getLogger("qwc")
 
 
 def setup_logging(path: Path) -> None:

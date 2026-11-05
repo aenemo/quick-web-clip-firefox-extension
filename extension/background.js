@@ -2,8 +2,8 @@ import { runClip } from "./lib/clip.js";
 import { buildMenuModel, normaliseSettings } from "./lib/settings.js";
 import { localDate } from "./lib/dates.js";
 
-const NATIVE_HOST = "obsidian_quick_clip";
-const PARENT_MENU_ID = "oqc-save-to";
+const NATIVE_HOST = "quick_web_clip";
+const PARENT_MENU_ID = "qwc-save-to";
 const DEST_PREFIX = "dest:";
 
 const BADGES = {
@@ -45,7 +45,7 @@ async function extract(tabId) {
   });
   const results = await browser.scripting.executeScript({
     target: { tabId },
-    func: () => window.__oqcExtract(),
+    func: () => window.__qwcExtract(),
   });
   return results[0].result;
 }
@@ -59,7 +59,7 @@ const deps = {
   notify: (message) =>
     browser.notifications.create({
       type: "basic",
-      title: "Obsidian Quick Clip",
+      title: "Quick Web Clip",
       message,
       iconUrl: "icons/icon-96.png",
     }),

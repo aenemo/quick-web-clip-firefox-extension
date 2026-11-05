@@ -1,6 +1,6 @@
 helper/venv/
 helper/*.log*
-helper/obsidian_quick_clip.json
+helper/quick_web_clip.json
 node_modules/
 web-ext-artifacts/
 __pycache__/

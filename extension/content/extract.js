@@ -1,5 +1,5 @@
 // Injected after the vendored Readability, turndown and turndown-plugin-gfm.
-// Defines window.__oqcExtract, which returns the page metadata and the body as Markdown.
+// Defines window.__qwcExtract, which returns the page metadata and the body as Markdown.
 (() => {
   const meta = (sel) => {
     const el = document.querySelector(sel);
@@ -45,7 +45,7 @@
     return out;
   };
 
-  window.__oqcExtract = () => {
+  window.__qwcExtract = () => {
     let article = null;
     try {
       article = new Readability(document.cloneNode(true)).parse();

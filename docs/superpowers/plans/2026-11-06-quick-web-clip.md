@@ -1,4 +1,4 @@
-# Obsidian Quick Clip Implementation Plan
+# Quick Web Clip Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
@@ -8,11 +8,11 @@
 
 **Tech Stack:** Firefox 128 or later (MV3, ES module background), vanilla JS, `node --test` (Node 24), Python 3.10 or later (3.14.7 on this machine), pytest, yt-dlp, Mozilla Readability, Turndown and turndown-plugin-gfm (vendored), web-ext (via `npx`, only for lint and signing).
 
-**Spec:** `docs/superpowers/specs/2026-11-05-obsidian-quick-clip-design.md`. Read it before starting any task. Section numbers below refer to it.
+**Spec:** `docs/superpowers/specs/2026-11-05-quick-web-clip-design.md`. Read it before starting any task. Section numbers below refer to it.
 
 ## Global Constraints
 
-- Gecko ID `obsidian-quick-clip@local`. Native host name `obsidian_quick_clip`. Protocol version `v: 1`.
+- Gecko ID `quick-web-clip@local`. Native host name `quick_web_clip`. Protocol version `v: 1`.
 - Command `clip-default`, suggested key `Alt+Shift+C`.
 - Permissions are exactly `nativeMessaging`, `menus`, `activeTab`, `scripting`, `storage` and `notifications`. No host permissions.
 - Every date written anywhere is `YYYY-MM-DD`. The clipped date is the local date.
@@ -59,7 +59,7 @@ extension/
   lib/classify.js              isClippable, classifyUrl
   lib/settings.js              settings model functions
   lib/clip.js                  runClip orchestration with injected deps, errorMessage
-  content/extract.js           defines window.__oqcExtract()
+  content/extract.js           defines window.__qwcExtract()
   vendor/                      Readability.js, turndown.js, turndown-plugin-gfm.js (+ LICENSE files)
   options/options.html|js|css
   icons/icon-48.png, icon-96.png
@@ -85,7 +85,7 @@ tests/                         node tests for extension/lib
   - `ping` replies `{"ok": True, "version": HOST_VERSION, "ytDlp": <yt_dlp.version.__version__ or None>}`.
   - Logging: `RotatingFileHandler(helper/clipper.log, maxBytes=1_000_000, backupCount=3)`.
 
-- [ ] **Step 1: Set up the environment.** Create `.gitignore` (`helper/venv/`, `helper/*.log*`, `helper/obsidian_quick_clip.json`, `node_modules/`, `web-ext-artifacts/`, `__pycache__/`) and the requirements files (`yt-dlp`, then `-r requirements.txt` + `pytest`). Run `py -m venv helper/venv && helper/venv/Scripts/python.exe -m pip install -r helper/requirements-dev.txt`. Expected: pytest and yt-dlp install without errors.
+- [ ] **Step 1: Set up the environment.** Create `.gitignore` (`helper/venv/`, `helper/*.log*`, `helper/quick_web_clip.json`, `node_modules/`, `web-ext-artifacts/`, `__pycache__/`) and the requirements files (`yt-dlp`, then `-r requirements.txt` + `pytest`). Run `py -m venv helper/venv && helper/venv/Scripts/python.exe -m pip install -r helper/requirements-dev.txt`. Expected: pytest and yt-dlp install without errors.
 - [ ] **Step 2: Write the failing tests** in `helper/tests/test_host.py`, using `io.BytesIO`:
   - `test_roundtrip_frame`: `write_message` then `read_message` returns an equal dict containing `"é"` and `"C:\\x"`.
   - `test_read_eof_returns_none`
@@ -275,8 +275,8 @@ tests/                         node tests for extension/lib
 
 **Interfaces:**
 - Produces:
-  - `build_manifest(helper_dir: Path) -> dict` returns `{"name": "obsidian_quick_clip", "description": "Obsidian Quick Clip helper", "path": str(helper_dir / "clipper_host.bat"), "type": "stdio", "allowed_extensions": ["obsidian-quick-clip@local"]}`.
-  - `install(helper_dir: Path, reg=winreg) -> Path` writes `helper_dir/obsidian_quick_clip.json` and sets the default value of `HKCU\Software\Mozilla\NativeMessagingHosts\obsidian_quick_clip` to that path.
+  - `build_manifest(helper_dir: Path) -> dict` returns `{"name": "quick_web_clip", "description": "Quick Web Clip helper", "path": str(helper_dir / "clipper_host.bat"), "type": "stdio", "allowed_extensions": ["quick-web-clip@local"]}`.
+  - `install(helper_dir: Path, reg=winreg) -> Path` writes `helper_dir/quick_web_clip.json` and sets the default value of `HKCU\Software\Mozilla\NativeMessagingHosts\quick_web_clip` to that path.
   - `uninstall(helper_dir: Path, reg=winreg) -> None` deletes the key (ignoring "not found") and the manifest file.
   - The CLI is `python install_host.py [--uninstall]`.
 - `clipper_host.bat` is exactly `@"%~dp0venv\Scripts\python.exe" "%~dp0clipper_host.py" %*`.
@@ -293,7 +293,7 @@ tests/                         node tests for extension/lib
   - `test_uninstall_tolerates_missing`: does not raise when the key and file are absent.
 - [ ] **Step 2: Run** `helper/venv/Scripts/python.exe -m pytest helper/tests/test_install_host.py -v`. Expected: FAIL.
 - [ ] **Step 3: Implement** `install_host.py` and the three `.bat` files.
-- [ ] **Step 4: Run** the tests again. Expected: pass. Then run `cmd //c helper\\install.bat`. Expected: "Helper installed.", and `reg query "HKCU\Software\Mozilla\NativeMessagingHosts\obsidian_quick_clip"` shows the manifest path.
+- [ ] **Step 4: Run** the tests again. Expected: pass. Then run `cmd //c helper\\install.bat`. Expected: "Helper installed.", and `reg query "HKCU\Software\Mozilla\NativeMessagingHosts\quick_web_clip"` shows the manifest path.
 - [ ] **Step 5: Check the helper end to end.** Run a one-off Python snippet that spawns `helper\clipper_host.bat`, writes a framed ping and reads the reply. Expected: `{"ok": true, "version": "1.0.0", "ytDlp": "<version>"}`.
 - [ ] **Step 6: Commit** with the message `feat(helper): installer and native host registration`.
 
@@ -378,7 +378,7 @@ tests/                         node tests for extension/lib
 
 **Interfaces:**
 - Consumes: `runClip`, `buildMenuModel`, `normaliseSettings` and `isClippable`.
-- `extract.js` defines `window.__oqcExtract = () => ({ page: {url, title, author, published, siteName, description}, ogType, bodyMarkdown })`.
+- `extract.js` defines `window.__qwcExtract = () => ({ page: {url, title, author, published, siteName, description}, ogType, bodyMarkdown })`.
   - It runs `new Readability(document.cloneNode(true)).parse()`. When the result is null or its content is empty, it uses `document.body.innerHTML`.
   - Before converting, it makes `img[src]` and `a[href]` absolute.
   - Conversion uses `new TurndownService({headingStyle:"atx", codeBlockStyle:"fenced", bulletListMarker:"-"}).use(turndownPluginGfm.gfm)`.
@@ -386,15 +386,15 @@ tests/                         node tests for extension/lib
   - Metadata comes from Readability (`byline`, `siteName`, `publishedTime`), then the `og:*`, `article:published_time` and JSON-LD `datePublished` / `author.name` fields.
   - `published` is passed through as is. `background.js` normalises it with `normalisePublished` before calling `runClip`, by wrapping the `extract` dependency.
 - `background.js` (`"background": {"scripts": ["background.js"], "type": "module"}`):
-  - `deps.extract` runs `browser.scripting.executeScript({target:{tabId}, files:["vendor/Readability.js","vendor/turndown.js","vendor/turndown-plugin-gfm.js","content/extract.js"]})` and then `executeScript({target:{tabId}, func: () => window.__oqcExtract()})`, returning `[0].result`.
-  - `deps.sendNative` is `browser.runtime.sendNativeMessage("obsidian_quick_clip", msg)`.
+  - `deps.extract` runs `browser.scripting.executeScript({target:{tabId}, files:["vendor/Readability.js","vendor/turndown.js","vendor/turndown-plugin-gfm.js","content/extract.js"]})` and then `executeScript({target:{tabId}, func: () => window.__qwcExtract()})`, returning `[0].result`.
+  - `deps.sendNative` is `browser.runtime.sendNativeMessage("quick_web_clip", msg)`.
   - `setBadge` uses the global constraints' text and colours (`#2e7d32`, `#f9a825`, `#c62828`) and clears `OK` after 2000 ms.
-  - `notify` is `browser.notifications.create({type:"basic", title:"Obsidian Quick Clip", message, iconUrl:"icons/icon-96.png"})`.
+  - `notify` is `browser.notifications.create({type:"basic", title:"Quick Web Clip", message, iconUrl:"icons/icon-96.png"})`.
   - It rebuilds the menus: a parent "Save to" in contexts `["page","action"]`, with children from `buildMenuModel`. It rebuilds on startup and on `storage.onChanged`.
   - Listeners: `action.onClicked`, `commands.onCommand("clip-default")` and `menus.onClicked` (strip the `dest:` prefix).
 
 - [ ] **Step 1: Vendor the libraries.** In the scratchpad, run `npm pack @mozilla/readability@0.6.0 turndown@7.2.0 turndown-plugin-gfm@1.0.2`, extract the packages, then copy `Readability.js`, `lib/turndown.browser.umd.js` (saved as `vendor/turndown.js`) and `dist/turndown-plugin-gfm.js` plus each LICENSE file into `extension/vendor/`. Record the versions in `extension/vendor/VERSIONS.txt`. Expected: the globals `Readability`, `TurndownService` and `turndownPluginGfm` are defined when the files are loaded in order.
-- [ ] **Step 2: Write** `extract.js`, `manifest.json` (name "Obsidian Quick Clip", version "1.0.0", `browser_specific_settings.gecko` with `id` and `strict_min_version: "128.0"`, `options_ui.page: "options/options.html"`, `action.default_title: "Save page to Obsidian"`) and `background.js`. Icons: generate solid purple (`#7c3aed`) 48 and 96 px PNGs with a short Python script in the scratchpad that uses only the standard library (`zlib` and `struct`). Commit the PNGs, not the script.
+- [ ] **Step 2: Write** `extract.js`, `manifest.json` (name "Quick Web Clip", version "1.0.0", `browser_specific_settings.gecko` with `id` and `strict_min_version: "128.0"`, `options_ui.page: "options/options.html"`, `action.default_title: "Save page to Obsidian"`) and `background.js`. Icons: generate solid purple (`#7c3aed`) 48 and 96 px PNGs with a short Python script in the scratchpad that uses only the standard library (`zlib` and `struct`). Commit the PNGs, not the script.
 - [ ] **Step 3: Lint** with `npx web-ext@8 lint --source-dir extension`. Expected: 0 errors. Warnings about the vendored code are acceptable if they're listed in the commit message.
 - [ ] **Step 4: Smoke test (manual).** Load the extension through `about:debugging`. Add a destination in `about:debugging` > Inspect > the console, using `browser.storage.local.set(...)`, pointing at a temporary folder. Open an article and press Alt+Shift+C. Expected: the badge shows `OK` and the note file appears with the spec section 7 article layout.
 - [ ] **Step 5: Commit** with the message `feat(ext): content extraction, manifest and background wiring`.

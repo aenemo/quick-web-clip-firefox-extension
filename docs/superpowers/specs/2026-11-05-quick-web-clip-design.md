@@ -1,4 +1,4 @@
-# Obsidian Quick Clip (Firefox) - Design Spec
+# Quick Web Clip (Firefox) - Design Spec
 
 Date: 2026-11-05
 Status: Draft for review
@@ -76,7 +76,7 @@ Responsibility split:
 ### 3.1 Extension (Manifest V3, Firefox 128 or later)
 
 - **`manifest.json`**
-  - Gecko ID `obsidian-quick-clip@local`
+  - Gecko ID `quick-web-clip@local`
   - Permissions: `nativeMessaging`, `menus`, `activeTab`, `scripting`, `storage`, `notifications`
   - No broad host permissions. `activeTab` is granted by the toolbar click, the shortcut command and the context-menu click, which is enough to inject the content script.
   - Command `clip-default`, suggested key `Alt+Shift+C`.
@@ -186,8 +186,8 @@ Responsibility split:
 - **`install.bat`**
   - Checks that Python 3.10 or later is present.
   - Creates `helper\venv` and installs `yt-dlp` into it.
-  - Writes `obsidian_quick_clip.json` (host name `obsidian_quick_clip`, type `stdio`, path to `clipper_host.bat`, `allowed_extensions: ["obsidian-quick-clip@local"]`).
-  - Sets `HKCU\Software\Mozilla\NativeMessagingHosts\obsidian_quick_clip` (default value = the manifest path). No admin rights are needed.
+  - Writes `quick_web_clip.json` (host name `quick_web_clip`, type `stdio`, path to `clipper_host.bat`, `allowed_extensions: ["quick-web-clip@local"]`).
+  - Sets `HKCU\Software\Mozilla\NativeMessagingHosts\quick_web_clip` (default value = the manifest path). No admin rights are needed.
 
 - **`uninstall.bat`**: removes the registry key, the host manifest and the venv.
 
@@ -252,7 +252,7 @@ Video-specific problems are not errors. The note is still saved, with a `warning
 3. If the URL cannot be clipped, show "This page can't be clipped" and stop.
 4. Set the badge to `...` (working).
 5. Inject the vendored libraries and `extract.js` with `scripting.executeScript`, and receive `{kind, page, bodyMarkdown}`.
-6. Send a `save` request with `runtime.sendNativeMessage("obsidian_quick_clip", ...)`.
+6. Send a `save` request with `runtime.sendNativeMessage("quick_web_clip", ...)`.
 7. In the helper:
    - **article**: render frontmatter `{title, source, author, published, clipped, tags:[clipping]}`, then the body, then `safe_write`.
    - **video**: call `fetch_video`.
@@ -373,7 +373,7 @@ Risk: a Firefox managed by company policy may block unlisted add-ons or native m
 ## 10. Project layout
 
 ```
-obsidian-quick-clip-firefox-extension/
+quick-web-clip-firefox-extension/
   extension/
     manifest.json
     background.js

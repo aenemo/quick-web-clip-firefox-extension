@@ -1,10 +1,10 @@
-"""Register (or remove) the Obsidian Quick Clip native messaging host."""
+"""Register (or remove) the Quick Web Clip native messaging host."""
 import argparse
 import json
 import winreg
 from pathlib import Path
 
-HOST_NAME = "obsidian_quick_clip"
+HOST_NAME = "quick_web_clip"
 KEY_PATH = r"Software\Mozilla\NativeMessagingHosts" + "\\" + HOST_NAME
 MANIFEST_NAME = HOST_NAME + ".json"
 
@@ -12,10 +12,10 @@ MANIFEST_NAME = HOST_NAME + ".json"
 def build_manifest(helper_dir: Path) -> dict:
     return {
         "name": HOST_NAME,
-        "description": "Obsidian Quick Clip helper",
+        "description": "Quick Web Clip helper",
         "path": str(helper_dir / "clipper_host.bat"),
         "type": "stdio",
-        "allowed_extensions": ["obsidian-quick-clip@local"],
+        "allowed_extensions": ["quick-web-clip@local"],
     }
 
 

@@ -5,7 +5,7 @@ import transcript
 from notes import NoteError, make_filename, render_frontmatter, safe_write
 from transcript import Unsupported, VideoError, VideoInfo, build_paragraphs, render_transcript
 
-log = logging.getLogger("oqc.save")
+log = logging.getLogger("qwc.save")
 
 
 def build_article_note(req: dict) -> tuple[str, str]:
