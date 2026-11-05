@@ -75,3 +75,11 @@ def test_safe_write_gives_up_after_99(tmp_path):
         safe_write(str(tmp_path), "", "Note", "y")
     assert exc.value.code == "write_failed"
     assert list(tmp_path.glob("*.tmp")) == []
+
+
+def test_safe_write_unencodable_text_leaves_no_temp(tmp_path):
+    with pytest.raises(NoteError) as exc:
+        safe_write(str(tmp_path), "", "Note", "bad " + chr(0xD800))
+    assert exc.value.code == "write_failed"
+    assert list(tmp_path.glob("*.tmp")) == []
+    assert list(tmp_path.glob("*.md")) == []

@@ -108,7 +108,7 @@ def safe_write(vault: str, subfolder: str, stem: str, text: str) -> str:
                 continue
             return str(final)
         raise OSError("too many files with the same name")
-    except OSError as exc:
+    except (OSError, ValueError) as exc:
         if tmp_name:
             try:
                 os.remove(tmp_name)
