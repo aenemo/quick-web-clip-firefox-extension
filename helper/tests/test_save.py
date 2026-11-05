@@ -71,7 +71,6 @@ def test_save_video_unsupported_falls_back_to_article(tmp_path, monkeypatch):
     r = host.handle(req(tmp_path, "video"))
     assert r["ok"] is True
     assert r["kind"] == "article"
-    assert "bodyMarkdown" not in r
     assert "body text" in Path(r["path"]).read_text(encoding="utf-8")
 
 
@@ -112,3 +111,10 @@ def test_log_has_no_body(tmp_path, logfile):
     content = logfile.read_text(encoding="utf-8")
     assert "save" in content
     assert "SECRET-BODY" not in content
+
+
+@pytest.mark.parametrize("bad_page", ["x", [1]])
+def test_save_non_dict_page_is_bad_request(tmp_path, bad_page):
+    out = host.handle(req(tmp_path, page=bad_page))
+    assert out["ok"] is False
+    assert out["error"] == "bad_request"

@@ -36,7 +36,7 @@ def build_video_note(
         kind = "none"
         transcript_text = f"Transcript unavailable: {reason}"
     else:
-        title = video.title
+        title = video.title or page.get("title")
         channel = video.channel
         published = video.published
         duration = video.duration
@@ -89,7 +89,8 @@ def _validate(req: dict) -> str | None:
 def save(req: dict) -> dict:
     problem = _validate(req)
     if problem:
-        log.info("save url=%s result=bad_request", (req.get("page") or {}).get("url"))
+        page = req.get("page")
+        log.info("save url=%s result=bad_request", page.get("url") if isinstance(page, dict) else None)
         return _bad_request(problem)
 
     url = req["page"]["url"]
