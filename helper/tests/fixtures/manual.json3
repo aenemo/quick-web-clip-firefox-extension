@@ -1,0 +1,14 @@
+{"wireVersion": 7, "events": [
+{"tStartMs": 0, "dDurationMs": 4000, "segs": [{"utf8": "Welcome to the channel."}]},
+{"tStartMs": 4000, "dDurationMs": 100, "segs": [{"utf8": "\n"}]},
+{"tStartMs": 4200, "dDurationMs": 4300, "segs": [{"utf8": "Today we are building a small garden shed."}]},
+{"tStartMs": 8500, "dDurationMs": 5000, "segs": [{"utf8": "First, you will need a flat patch of ground,"}, {"utf8": " some timber and a few hours."}]},
+{"tStartMs": 13500, "dDurationMs": 3000},
+{"tStartMs": 16500, "dDurationMs": 6000, "segs": [{"utf8": "Start by marking out the corners with string."}]},
+{"tStartMs": 22500, "dDurationMs": 5500, "segs": [{"utf8": "Check each diagonal so the frame stays square."}]},
+{"tStartMs": 28000, "dDurationMs": 6000, "segs": [{"utf8": "Is the ground level?\nIf not, dig out the high side."}]},
+{"tStartMs": 34000, "dDurationMs": 5000, "segs": [{"utf8": "Now cut the base boards to length."}]},
+{"tStartMs": 39000, "dDurationMs": 5000, "segs": [{"utf8": "Screw them down with galvanised screws!"}]},
+{"tStartMs": 44000, "dDurationMs": 6000, "segs": [{"utf8": "Then lift the walls into place."}]},
+{"tStartMs": 50000, "dDurationMs": 6000, "segs": [{"utf8": "That is all for this part, thanks for watching."}]}
+]}

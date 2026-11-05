@@ -1,0 +1,13 @@
+{"wireVersion": 7, "events": [
+{"tStartMs": 0, "dDurationMs": 3000, "segs": [{"utf8": "welcome to the channel"}]},
+{"tStartMs": 2000, "dDurationMs": 4000, "segs": [{"utf8": "welcome to the channel\ntoday we are building a"}]},
+{"tStartMs": 4000, "dDurationMs": 100, "segs": [{"utf8": "\n"}]},
+{"tStartMs": 4100, "dDurationMs": 4000, "segs": [{"utf8": "today we are building a\nsmall garden shed from timber"}]},
+{"tStartMs": 6500, "dDurationMs": 4000, "segs": [{"utf8": "small garden shed from timber\nyou will need a flat patch"}]},
+{"tStartMs": 9000, "dDurationMs": 4000, "segs": [{"utf8": "you will need a flat patch\nof ground and a few hours"}]},
+{"tStartMs": 11500, "dDurationMs": 4000, "segs": [{"utf8": "of ground and a few hours\nstart by marking out the corners"}]},
+{"tStartMs": 14000, "dDurationMs": 4000, "segs": [{"utf8": "start by marking out the corners\nwith string and check each diagonal"}]},
+{"tStartMs": 16500, "dDurationMs": 4000, "segs": [{"utf8": "with string and check each diagonal\nso the frame stays square"}]},
+{"tStartMs": 19000, "dDurationMs": 4000, "segs": [{"utf8": "so the frame stays square\nnow cut the base boards to length"}]},
+{"tStartMs": 21500, "dDurationMs": 4000, "segs": [{"utf8": "now cut the base boards to length\nand screw them down firmly"}]}
+]}
