@@ -8,6 +8,8 @@ import sys
 from pathlib import Path
 from typing import BinaryIO, Callable
 
+import compose
+
 HOST_VERSION = "1.0.0"
 PROTOCOL_VERSION = 1
 
@@ -55,7 +57,7 @@ def _ping(msg: dict) -> dict:
     return {"ok": True, "version": HOST_VERSION, "ytDlp": yt_dlp_version}
 
 
-ACTIONS: dict[str, Callable[[dict], dict]] = {"ping": _ping}
+ACTIONS: dict[str, Callable[[dict], dict]] = {"ping": _ping, "save": compose.save}
 
 
 def _bad_request(message: str) -> dict:
