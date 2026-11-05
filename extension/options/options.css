@@ -1,0 +1,71 @@
+:root {
+  color-scheme: light dark;
+  --bg: #ffffff;
+  --fg: #1b1b1f;
+  --muted: #5c5c66;
+  --border: #c9c9d1;
+  --accent: #3b5bdb;
+  --accent-fg: #ffffff;
+  --danger: #b3261e;
+  --ok: #1e7a34;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1c1c22;
+    --fg: #ececf1;
+    --muted: #a0a0ad;
+    --border: #44444e;
+    --accent: #8ea2ff;
+    --accent-fg: #11111a;
+    --danger: #ff8a80;
+    --ok: #6fd18a;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 14px/1.4 system-ui, sans-serif;
+}
+main { max-width: 760px; margin: 0 auto; padding: 16px; }
+h1 { font-size: 1.4rem; margin: 0 0 8px; }
+h2 { font-size: 1.05rem; margin: 24px 0 8px; }
+.status { margin: 0 0 8px; color: var(--muted); }
+.status.ok { color: var(--ok); }
+.status.bad { color: var(--danger); }
+.table-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; }
+th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+td.path { word-break: break-all; }
+.actions { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.field { margin-bottom: 12px; }
+label { display: block; font-weight: 600; margin-bottom: 4px; }
+input[type="text"], select {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--fg);
+  font: inherit;
+}
+select { width: auto; min-width: 12em; }
+button {
+  padding: 5px 10px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--fg);
+  font: inherit;
+  cursor: pointer;
+}
+button[type="submit"] { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+button:disabled { opacity: 0.5; cursor: default; }
+.hint { margin: 4px 0 0; color: var(--muted); font-size: 0.9em; }
+.error { margin: 4px 0 0; color: var(--danger); }
+.error:empty { display: none; }
+.confirm { color: var(--danger); }
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+}
