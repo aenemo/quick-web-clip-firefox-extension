@@ -175,3 +175,50 @@ test("errorMessage maps reply and thrown cases", () => {
   assert.equal(errorMessage(new Error("x")), HELPER_MISSING);
   assert.equal(errorMessage({ ok: false, message: "Refused" }), "Refused");
 });
+
+test("any native rejection maps to helper missing", async () => {
+  const { deps, calls } = makeDeps({
+    sendNative: async () => {
+      throw { message: "No such native application" };
+    },
+  });
+  const r = await runClip({ tab }, deps);
+  assert.deepEqual(r, { status: "error", message: HELPER_MISSING });
+  assert.deepEqual(calls.notify, [HELPER_MISSING]);
+});
+
+test("throwing setBadge does not change a successful result", async () => {
+  const { deps, calls } = makeDeps({
+    setBadge: () => {
+      throw new Error("badge broke");
+    },
+  });
+  const r = await runClip({ tab }, deps);
+  assert.equal(r.status, "ok");
+  assert.equal(calls.native.length, 1);
+});
+
+test("throwing setBadge in an error path still notifies", async () => {
+  const { deps, calls } = makeDeps({
+    setBadge: () => {
+      throw new Error("badge broke");
+    },
+    sendNative: async () => ({ ok: false, message: "Folder not found: X" }),
+  });
+  const r = await runClip({ tab }, deps);
+  assert.deepEqual(r, { status: "error", message: "Folder not found: X" });
+  assert.deepEqual(calls.notify, ["Folder not found: X"]);
+});
+
+test("throwing notify does not change a warning result", async () => {
+  const w = "Saved without transcript: yt-dlp not installed";
+  const { deps, calls } = makeDeps({
+    notify: () => {
+      throw new Error("notify broke");
+    },
+    sendNative: async () => ({ ok: true, path: "x.md", warning: w }),
+  });
+  const r = await runClip({ tab }, deps);
+  assert.equal(r.status, "warning");
+  assert.deepEqual(calls.badge.at(-1), [7, "warning"]);
+});

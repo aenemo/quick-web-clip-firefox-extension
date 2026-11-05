@@ -17,13 +17,17 @@ export function errorMessage(errOrReply) {
   return GENERIC_FAILURE;
 }
 
-function fail(tab, deps, message) {
+function safe(fn) {
   try {
-    deps.setBadge(tab.id, "error");
-    deps.notify(message);
+    fn();
   } catch {
-    // Reporting a failure must never throw.
+    // UI feedback must never change the clip result.
   }
+}
+
+function fail(tab, deps, message) {
+  safe(() => deps.setBadge(tab.id, "error"));
+  safe(() => deps.notify(message));
   return { status: "error", message };
 }
 
@@ -35,13 +39,13 @@ export async function runClip({ tab, destinationId = null }, deps) {
       return { status: "skipped" };
     }
     if (!isClippable(tab.url)) {
-      deps.notify(UNCLIPPABLE);
+      safe(() => deps.notify(UNCLIPPABLE));
       return { status: "skipped", message: UNCLIPPABLE };
     }
     const dest =
       settings.destinations.find((d) => d.id === destinationId) ?? getDefaultDestination(settings);
 
-    deps.setBadge(tab.id, "working");
+    safe(() => deps.setBadge(tab.id, "working"));
 
     let extracted;
     try {
@@ -73,18 +77,18 @@ export async function runClip({ tab, destinationId = null }, deps) {
     let reply;
     try {
       reply = await deps.sendNative(request);
-    } catch (err) {
-      return fail(tab, deps, errorMessage(err));
+    } catch {
+      return fail(tab, deps, HELPER_MISSING);
     }
 
     if (!reply || reply.ok !== true) return fail(tab, deps, errorMessage(reply ?? {}));
 
     if (reply.warning) {
-      deps.setBadge(tab.id, "warning");
-      deps.notify(reply.warning);
+      safe(() => deps.setBadge(tab.id, "warning"));
+      safe(() => deps.notify(reply.warning));
       return { status: "warning", message: reply.warning, path: reply.path };
     }
-    deps.setBadge(tab.id, "ok");
+    safe(() => deps.setBadge(tab.id, "ok"));
     return { status: "ok", path: reply.path };
   } catch (err) {
     return fail(tab, deps, `Unexpected error: ${err?.message ?? err}`);
