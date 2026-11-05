@@ -145,3 +145,19 @@ test("buildMenuModel marks exactly one default", () => {
   assert.deepEqual(m.map((x) => x.title), ["La (default)", "Lb", "Lc"]);
   assert.equal(m.filter((x) => x.title.includes(" (default)")).length, 1);
 });
+
+test("setDefault with an unknown id keeps the existing default", () => {
+  const out = setDefault(three(), "zz");
+  assert.deepEqual(defaults(out), [true, false, false]);
+});
+
+test("normaliseSettings drops malformed destination entries", () => {
+  const s = normaliseSettings({ destinations: [null, "x", 5, { label: "no id" }, dest("a")] });
+  assert.deepEqual(ids(s), ["a"]);
+  assert.deepEqual(defaults(s), [true]);
+});
+
+test("normaliseSettings treats a non-array destinations as empty", () => {
+  assert.deepEqual(normaliseSettings({ destinations: "nope" }).destinations, []);
+  assert.deepEqual(normaliseSettings({ destinations: {} }).destinations, []);
+});

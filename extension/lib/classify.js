@@ -5,7 +5,7 @@ const VIDEO_PATTERNS = [
   (u) => isHost(u, "youtube.com") && u.pathname === "/watch",
   (u) => isHost(u, "youtube.com") && /^\/(shorts|live)\/./.test(u.pathname),
   (u) => u.hostname === "youtu.be" && u.pathname.length > 1,
-  (u) => isHost(u, "vimeo.com") && /^\/(video\/)?\d+/.test(u.pathname),
+  (u) => isHost(u, "vimeo.com") && /^\/(video\/)?\d+(\/|$)/.test(u.pathname),
   (u) => isHost(u, "dailymotion.com") && u.pathname.startsWith("/video/"),
   (u) => isHost(u, "ted.com") && u.pathname.startsWith("/talks/"),
 ];

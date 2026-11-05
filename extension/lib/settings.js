@@ -14,7 +14,9 @@ export function normaliseSettings(raw) {
   const src = raw && typeof raw === "object" ? raw : {};
   const list = Array.isArray(src.destinations) ? src.destinations : [];
   const destinations = withSingleDefault(
-    list.map((d) => ({
+    list
+      .filter((d) => d && typeof d === "object" && d.id != null)
+      .map((d) => ({
       id: String(d.id),
       label: d.label ?? "",
       vaultPath: d.vaultPath ?? "",
@@ -44,10 +46,7 @@ export function getDefaultDestination(s) {
 }
 
 export function setDefault(s, id) {
-  return {
-    ...s,
-    destinations: s.destinations.map((d) => ({ ...d, isDefault: d.id === id })),
-  };
+  return { ...s, destinations: withSingleDefault(s.destinations, id) };
 }
 
 export function removeDestination(s, id) {

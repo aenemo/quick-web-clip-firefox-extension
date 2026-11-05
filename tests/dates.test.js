@@ -29,3 +29,11 @@ test("normalisePublished returns null for garbage and empty input", () => {
   assert.equal(normalisePublished(null), null);
   assert.equal(normalisePublished(""), null);
 });
+
+test("normalisePublished rejects an impossible calendar date", () => {
+  assert.equal(normalisePublished("2026-02-30"), null);
+});
+
+test("normalisePublished converts a UTC time to the next local day", () => {
+  assert.equal(normalisePublished("2026-03-14T23:30:00Z"), "2026-03-15");
+});

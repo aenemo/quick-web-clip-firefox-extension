@@ -54,3 +54,9 @@ test("isClippable accepts http, https and file", () => {
   assert.equal(isClippable("http://example.com/a.pdf.html"), true);
   assert.equal(isClippable("file:///C:/docs/a.html"), true);
 });
+
+test("classifyUrl: vimeo path must be a whole numeric id", () => {
+  assert.equal(classifyUrl("https://vimeo.com/123abc"), "article");
+  assert.equal(classifyUrl("https://vimeo.com/123/abc"), "video");
+  assert.equal(classifyUrl("https://vimeo.com/video/123"), "video");
+});
