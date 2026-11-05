@@ -1,5 +1,7 @@
 """Caption parsing and timestamped transcript rendering (pure functions)."""
+import concurrent.futures
 import json
+import logging
 import re
 from typing import NamedTuple
 from urllib.parse import parse_qs, urldefrag, urlparse
@@ -182,3 +184,124 @@ def render_transcript(sections: list[Section], url: str) -> str:
             stamp = f"[{format_ts(start)}]({link})" if link else format_ts(start)
             blocks.append(f"{stamp} {text}")
     return "\n\n".join(blocks)
+
+
+TIMEOUT_SECONDS = 60
+_log = logging.getLogger("oqc.ytdlp")
+
+
+class Unsupported(Exception):
+    """yt-dlp does not support this URL."""
+
+
+class VideoError(Exception):
+    def __init__(self, reason: str):
+        super().__init__(reason)
+        self.reason = reason
+
+
+class VideoInfo(NamedTuple):
+    title: str
+    channel: str
+    published: str | None
+    duration: str | None
+    description: str
+    chapters: list | None
+    cues: list[Cue]
+    transcript: str
+
+
+def _pick_track(tracks: dict | None, language: str | None) -> tuple[str, str] | None:
+    if not tracks:
+        return None
+    keys = [k for k in tracks if k == "en"]
+    keys += [k for k in tracks if k.startswith("en-")]
+    if language and language in tracks:
+        keys.append(language)
+    keys += list(tracks)
+    for key in keys:
+        by_ext = {t.get("ext"): t.get("url") for t in tracks[key] or [] if t.get("url")}
+        for fmt in ("json3", "vtt"):
+            if fmt in by_ext:
+                return by_ext[fmt], fmt
+    return None
+
+
+def select_track(info: dict) -> tuple[str, str, str] | None:
+    language = info.get("language")
+    for field, kind in (("subtitles", "manual"), ("automatic_captions", "auto")):
+        found = _pick_track(info.get(field), language)
+        if found:
+            return found[0], found[1], kind
+    return None
+
+
+def _short(exc: BaseException) -> str:
+    lines = str(exc).strip().splitlines()
+    return (lines[0].strip() if lines else "")[:200] or type(exc).__name__
+
+
+def _fetch(url: str, ydl_factory) -> VideoInfo:
+    opts = {
+        "skip_download": True,
+        "noplaylist": True,
+        "quiet": True,
+        "no_warnings": True,
+        "logger": _log,
+        "noprogress": True,
+    }
+    with ydl_factory(opts) as ydl:
+        info = ydl.extract_info(url, download=False) or {}
+        cues: list[Cue] = []
+        transcript = "none"
+        track = select_track(info)
+        if track:
+            track_url, fmt, kind = track
+            try:
+                data = ydl.urlopen(track_url).read().decode("utf-8")
+                cues = parse_captions(data, fmt)
+            except Exception as exc:
+                raise VideoError(f"could not download captions: {_short(exc)[:170]}") from exc
+            transcript = kind if cues else "none"
+    upload = info.get("upload_date") or ""
+    published = f"{upload[:4]}-{upload[4:6]}-{upload[6:8]}" if len(upload) == 8 and upload.isdigit() else None
+    duration = info.get("duration")
+    return VideoInfo(
+        title=info.get("title") or "",
+        channel=info.get("channel") or info.get("uploader") or "",
+        published=published,
+        duration=format_ts(duration) if duration else None,
+        description=info.get("description") or "",
+        chapters=info.get("chapters"),
+        cues=cues,
+        transcript=transcript,
+    )
+
+
+def fetch_video(url: str, timeout: float = 60, ydl_factory=None) -> VideoInfo:
+    try:
+        import yt_dlp
+        import yt_dlp.utils as ydl_utils
+    except ImportError as exc:
+        raise VideoError("yt-dlp not installed") from exc
+    if ydl_factory is None:
+        ydl_factory = yt_dlp.YoutubeDL
+
+    executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
+    future = executor.submit(_fetch, url, ydl_factory)
+    try:
+        return future.result(timeout=timeout)
+    except concurrent.futures.TimeoutError:
+        raise VideoError(f"timed out after {TIMEOUT_SECONDS} seconds") from None
+    except VideoError:
+        raise
+    except ydl_utils.UnsupportedError as exc:
+        raise Unsupported(_short(exc)) from exc
+    except ydl_utils.DownloadError as exc:
+        if "Unsupported URL" in str(exc):
+            raise Unsupported(_short(exc)) from exc
+        raise VideoError(_short(exc)) from exc
+    except Exception as exc:
+        raise VideoError(_short(exc)) from exc
+    finally:
+        executor.shutdown(wait=False, cancel_futures=True)
