@@ -13,20 +13,23 @@ const BADGES = {
   error: { text: "ERR", color: "#c62828" },
 };
 
-const badgeState = new Map();
+const badgeTimers = new Map();
 
 async function setBadge(tabId, state) {
   const b = BADGES[state];
-  badgeState.set(tabId, state);
+  // Any state change cancels a pending OK-clear for this tab.
+  clearTimeout(badgeTimers.get(tabId));
+  badgeTimers.delete(tabId);
   await browser.action.setBadgeText({ tabId, text: b.text });
   await browser.action.setBadgeBackgroundColor({ tabId, color: b.color });
   if (state === "ok") {
-    setTimeout(() => {
-      // Only clear if no newer state has replaced OK on this tab.
-      if (badgeState.get(tabId) !== "ok") return;
-      badgeState.delete(tabId);
-      browser.action.setBadgeText({ tabId, text: "" }).catch(() => {});
-    }, 2000);
+    badgeTimers.set(
+      tabId,
+      setTimeout(() => {
+        badgeTimers.delete(tabId);
+        browser.action.setBadgeText({ tabId, text: "" }).catch(() => {});
+      }, 2000),
+    );
   }
 }
 
@@ -73,13 +76,22 @@ async function activeTab() {
   return tab;
 }
 
-async function rebuildMenus() {
+function createMenu(props) {
+  return new Promise((resolve) => {
+    browser.menus.create(props, () => {
+      void browser.runtime.lastError; // read so a failure is never reported as unchecked
+      resolve();
+    });
+  });
+}
+
+async function doRebuild() {
   await browser.menus.removeAll();
   const settings = normaliseSettings(await browser.storage.local.get(null));
   if (settings.destinations.length === 0) return;
-  browser.menus.create({ id: PARENT_MENU_ID, title: "Save to", contexts: ["page", "action"] });
+  await createMenu({ id: PARENT_MENU_ID, title: "Save to", contexts: ["page", "action"] });
   for (const item of buildMenuModel(settings)) {
-    browser.menus.create({
+    await createMenu({
       id: item.id,
       parentId: PARENT_MENU_ID,
       title: item.title,
@@ -87,6 +99,10 @@ async function rebuildMenus() {
     });
   }
 }
+
+// Serialise rebuilds so concurrent triggers cannot interleave and duplicate ids.
+let menuBuild = Promise.resolve();
+const rebuildMenus = () => (menuBuild = menuBuild.then(doRebuild, doRebuild));
 
 browser.action.onClicked.addListener((tab) => clip(tab));
 
