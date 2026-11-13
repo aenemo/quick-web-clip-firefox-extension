@@ -4,3 +4,4 @@ helper/quick_web_clip.json
 node_modules/
 web-ext-artifacts/
 __pycache__/
+extension/.amo-upload-uuid
