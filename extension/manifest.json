@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Quick Web Clip",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Save the current page to an Obsidian vault as a Markdown note.",
   "browser_specific_settings": {
     "gecko": {
