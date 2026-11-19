@@ -7,3 +7,7 @@ web-ext-artifacts/
 dist/
 __pycache__/
 extension/.amo-upload-uuid
+
+# Local build outputs and downloaded packages
+extension/*.zip
+extension/*.xpi

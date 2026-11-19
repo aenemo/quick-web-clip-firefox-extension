@@ -1,0 +1,24 @@
+Quick Web Clip helper
+=====================
+
+The Quick Web Clip add-on for Firefox uses this helper to
+write Markdown notes and images into your Obsidian vault. Install it once.
+
+1. Install Python 3.10 or later from https://www.python.org (keep "py launcher" ticked).
+2. Unzip this folder to a permanent place, for example
+   C:\Users\<you>\Apps\quick-web-clip-helper
+   Firefox runs the helper from this folder, so do not delete or move it later.
+   (If you do move it, run install.bat again from the new place.)
+3. Double-click install.bat. It creates a private Python environment in this folder,
+   installs yt-dlp (for video transcripts) and registers the helper with Firefox
+   for your Windows account only. No administrator rights are needed.
+4. Open the Quick Web Clip options page in Firefox. It should say
+   "Helper connected".
+
+To update: unzip the new version over this folder and run install.bat again.
+To remove: run uninstall.bat, then delete this folder.
+
+The helper keeps a log in clipper.log in this folder (times, actions, page addresses
+and results, never note text). Nothing is sent to the developer.
+
+Source, issues and licence (MIT): https://github.com/aenemo/quick-web-clip-firefox-extension

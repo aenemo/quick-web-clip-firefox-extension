@@ -1,6 +1,6 @@
 # Quick Web Clip
 
-A Firefox, Chrome and Edge extension that saves the current page into an Obsidian vault as a Markdown note with one action: a toolbar click or the keyboard shortcut Alt+Shift+C. There is no popup and no Save dialog. It works whether or not Obsidian is running.
+A Firefox extension that saves the current page into an Obsidian vault as a Markdown note with one action: a toolbar click or the keyboard shortcut Alt+Shift+C. There is no popup and no Save dialog. It works whether or not Obsidian is running.
 
 - Articles are reduced to the main content (Readability) and converted to Markdown.
 - Videos (YouTube, Vimeo, Dailymotion, TED) are saved with details, description and a timestamped transcript, with chapter headings where the video has chapters.
@@ -16,10 +16,12 @@ The extension talks to a small Python helper through native messaging. The helpe
 
 - Windows 11
 - Python 3.10 or later, available through the `py` launcher
-- Firefox 128 or later, Chrome 120 or later, or Edge 120 or later
+- Firefox 140 or later (140 ESR included)
 - Node 20 or later, only needed to run the tests or to sign the extension
 
 ## Install the helper
+
+If you installed the add-on from addons.mozilla.org, download `quick-web-clip-helper-<version>.zip` from the latest GitHub release (https://github.com/aenemo/quick-web-clip-firefox-extension/releases/latest) and follow `INSTALL.txt` inside it. From a copy of this repository:
 
 Run once from the repository folder:
 
@@ -27,7 +29,7 @@ Run once from the repository folder:
 helper\install.bat
 ```
 
-This creates `helper\venv`, installs yt-dlp into it, writes `helper\quick_web_clip.json` and `helper\quick_web_clip_chromium.json`, and registers the native host for Firefox, Chrome and Edge under `HKCU\Software\Mozilla\NativeMessagingHosts\quick_web_clip`, `HKCU\Software\Google\Chrome\NativeMessagingHosts\quick_web_clip` and `HKCU\Software\Microsoft\Edge\NativeMessagingHosts\quick_web_clip`. No administrator rights are needed.
+This creates `helper\venv`, installs yt-dlp into it, writes `helper\quick_web_clip.json` and registers the native host for Firefox under `HKCU\Software\Mozilla\NativeMessagingHosts\quick_web_clip`. No administrator rights are needed. The browser and the add-on ID come from `helper/extension_ids.json`.
 
 ## Load the extension (temporary)
 
@@ -39,22 +41,16 @@ A temporary add-on is removed when Firefox restarts.
 
 ## Chrome and Edge
 
-The Chrome and Edge versions are built from the same source. Build them from the repository folder:
+The Chrome and Edge versions have their own repositories, each with its own helper:
 
-```
-py -3 tools\build_chromium.py
-```
+- Chrome: https://github.com/aenemo/quick-web-clip-chrome-extension
+- Edge: https://github.com/aenemo/quick-web-clip-edge-extension
 
-This writes `dist\chrome` and `dist\edge` (the same files, one folder for each browser). Then:
+Each helper registers only for its own browser, so the three can be installed side by side.
 
-1. Open `chrome://extensions` (Chrome) or `edge://extensions` (Edge).
-2. Turn on Developer mode.
-3. Click "Load unpacked" and select `dist\chrome` or `dist\edge`.
-4. Open the extension options page (Details, Extension options), add a destination and check that the helper is connected.
+## Publishing to addons.mozilla.org
 
-The extension ID is always `kcdeoockaleljccbljbelmpehlnnceop`, fixed by the `key` in the built manifest, which is the ID the helper allows. An unpacked extension stays installed when the browser restarts. After changing the source, run the build again and click the reload button on the extensions page. Run `helper\install.bat` again if the helper was installed before version 1.4.0, so that Chrome and Edge are registered.
-
-In Chrome and Edge the shortcut is changed at `chrome://extensions/shortcuts` or `edge://extensions/shortcuts`.
+The `store` folder has the AMO listing text, reviewer notes, privacy policy and version notes. `py -3 tools\package_stores.py` builds the upload zip and the helper zip into `dist\store`. See `store/README.md` for the steps.
 
 ## Permanent install in Firefox (unlisted signing)
 
@@ -92,7 +88,7 @@ yt-dlp may warn that no JavaScript runtime is installed. Installing deno (https:
 helper\uninstall.bat
 ```
 
-This removes the registry keys, the host manifests and the venv. Then remove the extension in `about:addons`, `chrome://extensions` or `edge://extensions`.
+This removes the Firefox registry key, the host manifest and the venv. Then remove the add-on in `about:addons`.
 
 ## Troubleshooting
 
@@ -114,8 +110,10 @@ A Firefox managed by company policy may block unlisted add-ons or native messagi
 helper\venv\Scripts\python.exe -m pytest helper -q
 npm test
 npx web-ext@8 lint --source-dir extension
-py -3 tools\build_chromium.py
+py -3 tools\package_stores.py
 ```
+
+`extension/compat.js` is kept so the extension code stays the same as in the Chrome and Edge repositories; in Firefox it does nothing.
 
 ## Verified
 
@@ -160,9 +158,13 @@ These checks have not been run yet. They need a real Firefox, which could not be
 | Options: menu list | Add two destinations, open the right-click Save to menu | Both are listed, one marked " (default)" | | |
 | Options: default and order | Switch the default, delete the default, reorder | The menu follows each change | | |
 | Options: invalid path | Enter a relative vault path | Message "Vault folder must be a full path" | | |
-| Options: helper status | Open the options page | "Helper connected (v1.4.0), yt-dlp <version>" (or "yt-dlp not installed", or "Helper not found. Run install.bat in the helper folder.") | | |
+| Options: helper status | Open the options page | "Helper connected (v1.5.1), yt-dlp <version>" (or "yt-dlp not installed", or "Helper not found. Run install.bat in the helper folder.") | | |
 | Options: persistence | Reload the extension | Settings are still present | | |
 | Teams chat with images | Open a Teams chat (teams.cloud.microsoft) that shows pasted images, press Alt+Shift+C | Images saved in `attachments` beside the note, each shown in Obsidian and linked to its `asyncgw.teams.microsoft.com` URL. No `blob:` links in the note | | |
 | Teams selection | In a Teams chat, select a few messages including an image, press Alt+Shift+C | Note holds only the selected messages. The image is saved in `attachments` and linked to its original | | |
 | Selection on a video page | On a YouTube page, select some description text, press Alt+Shift+C | Note holds only the selected text, saved as an article (no transcript) | | |
 | Options: two tabs | Open the options page in two tabs, change a setting in one | The change appears in the other | | |
+
+## Licence
+
+MIT. See `LICENSE`.
