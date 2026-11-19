@@ -1,3 +1,4 @@
+import "./compat.js";
 import { runClip } from "./lib/clip.js";
 import { buildMenuModel, normaliseSettings } from "./lib/settings.js";
 

@@ -20,4 +20,6 @@ if errorlevel 1 exit /b 1
 
 echo Helper installed.
 echo Next step: load the extension in Firefox (about:debugging, This Firefox, Load Temporary Add-on).
+echo For Chrome or Edge, run "py -3 tools\build_chromium.py" from the repository folder,
+echo then load dist\chrome or dist\edge with Load unpacked (Developer mode on).
 endlocal

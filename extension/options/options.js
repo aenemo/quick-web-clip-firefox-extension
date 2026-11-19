@@ -1,3 +1,4 @@
+import "../compat.js";
 import {
   moveDestination,
   normaliseSettings,

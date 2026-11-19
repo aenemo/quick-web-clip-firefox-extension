@@ -1,7 +1,9 @@
 helper/venv/
 helper/*.log*
 helper/quick_web_clip.json
+helper/quick_web_clip_chromium.json
 node_modules/
 web-ext-artifacts/
+dist/
 __pycache__/
 extension/.amo-upload-uuid

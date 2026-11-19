@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.4.0 (19/11/2026)
+- Chrome and Edge versions: `tools/build_chromium.py` builds `dist/chrome` and `dist/edge` from the same source, to load unpacked with Developer mode on. A fixed key in the built manifest keeps the extension ID the same on every machine.
+- `install.bat` now also registers the helper for Chrome and Edge (`helper/quick_web_clip_chromium.json`), and `uninstall.bat` removes those keys too. Run `install.bat` again after updating.
+- `compat.js` lets the same scripts run in Chrome and Edge, which name the extension API `chrome` and the context menu API `contextMenus`.
+
 ## 1.3.0 (19/11/2026)
 - The clip time is saved with the date: in the "clipped" property (`2026-11-19 2:05 pm`) and in the file name (`Title 2026-11-19 2.05 pm.md`). File names use a dot in place of the colon, which Windows does not allow.
 - New setting "Time format": 12-hour (2:05 pm, the default) or 24-hour (14:05).
