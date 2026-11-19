@@ -175,3 +175,15 @@ test("the next fetcher and source are tried when one fails", async () => {
   assert.equal(att.length, 1);
   assert.equal(img.getAttribute("src"), "qwc-attachment:0");
 });
+
+test("Teams profile pictures are dropped, other images are kept", () => {
+  const avatar = new FakeEl("img", {
+    src: "https://teams.cloud.microsoft/api/mt/part/au-01/beta/users/u1/profilepicturev2/8:orgid:u2?size=HR64x64",
+  });
+  const photo = new FakeEl("img", { src: "https://example.com/a.png" });
+  const doc = makeContainer([avatar, photo]);
+  images.resolveTeamsImages(doc, []);
+  assert.deepEqual(doc.querySelectorAll("img"), [photo]);
+  assert.equal(images.isTeamsAvatar("https://teams.microsoft.com/api/mt/x/profilepicturev2/y"), true);
+  assert.equal(images.isTeamsAvatar("https://example.com/profilepicture/1"), false);
+});

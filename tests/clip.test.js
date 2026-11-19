@@ -253,3 +253,22 @@ test("extracted images are passed to the helper", async () => {
   await runClip({ tab: { id: 5, url: "https://teams.cloud.microsoft/" } }, deps);
   assert.deepEqual(calls.native[0].attachments, attachments);
 });
+
+test("a selection is saved as an article, even on a video page", async () => {
+  const tabUrl = "https://www.youtube.com/watch?v=abc123";
+  const { deps, calls } = makeDeps({
+    extract: async () => ({ page: { url: tabUrl, title: "V" }, ogType: "video.other", bodyMarkdown: "picked", selection: true }),
+  });
+  await runClip({ tab: { id: 6, url: tabUrl } }, deps);
+  assert.equal(calls.native[0].kind, "article");
+  assert.equal(calls.native[0].bodyMarkdown, "picked");
+});
+
+test("without a selection a video page is still a video clip", async () => {
+  const tabUrl = "https://www.youtube.com/watch?v=abc123";
+  const { deps, calls } = makeDeps({
+    extract: async () => ({ page: { url: tabUrl, title: "V" }, ogType: "video.other", bodyMarkdown: "", selection: false }),
+  });
+  await runClip({ tab: { id: 6, url: tabUrl } }, deps);
+  assert.equal(calls.native[0].kind, "video");
+});

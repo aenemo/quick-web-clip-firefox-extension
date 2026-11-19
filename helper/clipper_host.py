@@ -10,7 +10,7 @@ from typing import BinaryIO, Callable
 
 import compose
 
-HOST_VERSION = "1.1.1"
+HOST_VERSION = "1.2.0"
 PROTOCOL_VERSION = 1
 
 log = logging.getLogger("qwc")

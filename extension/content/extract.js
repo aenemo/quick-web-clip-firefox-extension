@@ -53,23 +53,49 @@
   }
   pageFetchers.push(fetch);
 
-  window.__qwcExtract = async () => {
-    const images = globalThis.__qwcImages;
-    const prepared = document.cloneNode(true);
+  // A copy of what the user has selected, or null when nothing (or only whitespace) is selected.
+  const selectedContent = () => {
+    const sel = window.getSelection();
+    if (!sel || sel.isCollapsed || sel.rangeCount === 0) return null;
+    const holder = document.createElement("div");
+    for (let i = 0; i < sel.rangeCount; i++) holder.appendChild(sel.getRangeAt(i).cloneContents());
+    return holder.textContent.trim() || holder.querySelector("img") ? holder : null;
+  };
+
+  const resolveImages = (root) => {
     try {
-      images.resolveTeamsImages(prepared, performance.getEntriesByType("resource").map((e) => e.name));
+      globalThis.__qwcImages.resolveTeamsImages(root, performance.getEntriesByType("resource").map((e) => e.name));
     } catch {
       // Images keep their page URLs.
     }
+  };
 
+  window.__qwcExtract = async () => {
+    const images = globalThis.__qwcImages;
     let article = null;
-    try {
-      article = new Readability(prepared.cloneNode(true)).parse();
-    } catch {
-      article = null;
+    let html;
+    const selection = selectedContent();
+    if (selection) {
+      // Only the selection is clipped, as it is: no Readability.
+      resolveImages(selection);
+      if (globalThis.__qwcTeams && globalThis.__qwcTeams.isTeamsHost(location.host)) {
+        try {
+          globalThis.__qwcTeams.tidyTeamsChat(selection);
+        } catch {
+          // Clip the selection untidied.
+        }
+      }
+      html = selection.innerHTML;
+    } else {
+      const prepared = document.cloneNode(true);
+      resolveImages(prepared);
+      try {
+        article = new Readability(prepared.cloneNode(true)).parse();
+      } catch {
+        article = null;
+      }
+      html = article && article.content && article.content.trim() ? article.content : prepared.body.innerHTML;
     }
-
-    const html = article && article.content && article.content.trim() ? article.content : prepared.body.innerHTML;
 
     // Parse into an inert document (no script execution, no resource loading).
     const container = new DOMParser().parseFromString(html, "text/html").body;
@@ -108,6 +134,12 @@
         (article && article.excerpt) || meta('meta[property="og:description"]') || meta('meta[name="description"]'),
     };
 
-    return { page, ogType: meta('meta[property="og:type"]') || null, bodyMarkdown, attachments };
+    return {
+      page,
+      ogType: meta('meta[property="og:type"]') || null,
+      bodyMarkdown,
+      attachments,
+      selection: Boolean(selection),
+    };
   };
 })();

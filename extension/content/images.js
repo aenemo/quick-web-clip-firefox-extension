@@ -51,11 +51,26 @@
     return null;
   }
 
+  // Teams profile pictures load only while signed in, so they would be broken in a note.
+  const isTeamsAvatar = (src) => {
+    try {
+      const u = new URL(src);
+      return /(^|\.)teams\.(cloud\.)?microsoft(\.com)?$/i.test(u.host) && /\/profilepicture/i.test(u.pathname);
+    } catch {
+      return false;
+    }
+  };
+
   // Point Teams images in a cloned document at their original URL, before Readability runs.
   // A loaded copy (blob: URL) is remembered so it can be read without another download.
+  // Teams profile pictures are dropped.
   function resolveTeamsImages(doc, resourceUrls) {
     const host = pickGatewayHost(resourceUrls);
     for (const img of doc.querySelectorAll("img")) {
+      if (isTeamsAvatar(img.getAttribute("src") || "")) {
+        img.remove();
+        continue;
+      }
       const url = teamsImageUrl(img, host);
       if (!url) continue;
       const src = img.getAttribute("src") || "";
@@ -150,6 +165,7 @@
     pickGatewayHost,
     amsImageUrl,
     isAmsImageUrl,
+    isTeamsAvatar,
     teamsImageUrl,
     resolveTeamsImages,
     collectAttachments,

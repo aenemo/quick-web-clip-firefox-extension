@@ -110,3 +110,16 @@ def test_failed_note_write_removes_images(tmp_path, monkeypatch):
     r = host.handle(save_req(tmp_path))
     assert r["ok"] is False
     assert list((tmp_path / "Clippings" / "attachments").iterdir()) == []
+
+
+def test_links_resolve_in_obsidian(tmp_path):
+    """Obsidian decodes link paths with decodeURI, which leaves %2C and similar as they are."""
+    import base64
+    from urllib.parse import unquote
+    item = {"token": "qwc-attachment:0", "mime": "image/png", "data": base64.b64encode(b"PNG").decode()}
+    links, written, skipped = save_attachments(tmp_path, "Chat A, B; C #1 [x]", [item])
+    link = links["qwc-attachment:0"]
+    assert link == "attachments/Chat%20A,%20B;%20C%201%20x%201.png"
+    assert "%2C" not in link and "%3B" not in link
+    assert (tmp_path / unquote(link)).is_file()
+    assert skipped == 0 and len(written) == 1

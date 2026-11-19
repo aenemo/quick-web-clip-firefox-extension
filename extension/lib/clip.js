@@ -53,14 +53,15 @@ export async function runClip({ tab, destinationId = null }, deps) {
     } catch {
       return fail(tab, deps, EXTRACT_FAILED);
     }
-    const { page = {}, ogType = null, bodyMarkdown = "", attachments = [] } = extracted ?? {};
+    const { page = {}, ogType = null, bodyMarkdown = "", attachments = [], selection = false } = extracted ?? {};
     // The canonical link can lag after in-page navigation (YouTube), so a video tab URL wins.
     const url = classifyUrl(tab.url, null) === "video" ? tab.url : page.url || tab.url;
 
     const request = {
       v: 1,
       action: "save",
-      kind: classifyUrl(url, ogType),
+      // A selection is saved as it is, even on a video page.
+      kind: selection === true ? "article" : classifyUrl(url, ogType),
       destination: { vaultPath: dest.vaultPath, subfolder: dest.subfolder },
       datePosition: settings.datePosition,
       clippedDate: deps.today(),

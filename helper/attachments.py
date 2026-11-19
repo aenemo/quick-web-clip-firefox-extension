@@ -18,6 +18,11 @@ _EXT = {
     "image/svg+xml": "svg",
 }
 _MAX_FILES = 999
+# Obsidian reads link paths with decodeURI, which leaves %-escapes of these characters
+# undecoded, so they stay as they are in links.
+_LINK_SAFE = "/;,@&=+$!'~*"
+# Characters that break an Obsidian link even when escaped.
+_LINK_UNSAFE = re.compile(r"[#^\[\]|]")
 
 
 def _write_new(folder: Path, stem: str, ext: str, data: bytes, start: int) -> tuple[Path, int]:
@@ -43,6 +48,7 @@ def save_attachments(target: Path, stem: str, items) -> tuple[dict[str, str], li
     if not isinstance(items, list):
         return links, written, 0
     folder = target / FOLDER
+    stem = " ".join(_LINK_UNSAFE.sub(" ", stem).split()) or "image"
     number = 1
     for item in items:
         try:
@@ -61,7 +67,7 @@ def save_attachments(target: Path, stem: str, items) -> tuple[dict[str, str], li
             continue
         number = used + 1
         written.append(path)
-        links[token] = f"{FOLDER}/{quote(path.name)}"
+        links[token] = f"{FOLDER}/{quote(path.name, safe=_LINK_SAFE)}"
     return links, written, skipped
 
 

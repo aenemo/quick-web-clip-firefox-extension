@@ -41,6 +41,7 @@ async function extract(tabId) {
       "vendor/turndown.js",
       "vendor/turndown-plugin-gfm.js",
       "content/images.js",
+      "content/teams.js",
       "content/extract.js",
     ],
   });
@@ -90,13 +91,13 @@ async function doRebuild() {
   await browser.menus.removeAll();
   const settings = normaliseSettings(await browser.storage.local.get(null));
   if (settings.destinations.length === 0) return;
-  await createMenu({ id: PARENT_MENU_ID, title: "Save to", contexts: ["page", "action"] });
+  await createMenu({ id: PARENT_MENU_ID, title: "Save to", contexts: ["page", "selection", "image", "action"] });
   for (const item of buildMenuModel(settings)) {
     await createMenu({
       id: item.id,
       parentId: PARENT_MENU_ID,
       title: item.title,
-      contexts: ["page", "action"],
+      contexts: ["page", "selection", "image", "action"],
     });
   }
 }
