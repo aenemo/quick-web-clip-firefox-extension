@@ -4,6 +4,14 @@ export function localDate(d = new Date()) {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
+// "14:05" (24-hour) or "2:05 pm" (12-hour).
+export function localTime(d = new Date(), format = "12h") {
+  const h = d.getHours();
+  const m = pad(d.getMinutes());
+  if (format === "24h") return `${pad(h)}:${m}`;
+  return `${h % 12 || 12}:${m} ${h < 12 ? "am" : "pm"}`;
+}
+
 export function normalisePublished(s) {
   if (typeof s !== "string" || s.trim() === "") return null;
   const text = s.trim();

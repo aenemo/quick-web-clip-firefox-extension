@@ -1,5 +1,6 @@
 """Compose note text for article and video clips, and the save action."""
 import logging
+import re
 
 import attachments
 import transcript
@@ -7,6 +8,19 @@ from notes import NoteError, make_filename, render_frontmatter, resolve_target, 
 from transcript import Unsupported, VideoError, VideoInfo, build_paragraphs, render_transcript
 
 log = logging.getLogger("qwc.save")
+
+_TIME = re.compile(r"\d{1,2}:\d{2}( [ap]m)?")
+
+
+def _clipped(req: dict) -> str:
+    """The clip date and time for the "clipped" property: "2026-11-19 2:05 pm"."""
+    time = req.get("clippedTime")
+    return f"{req['clippedDate']} {time}" if time else req["clippedDate"]
+
+
+def _file_stamp(req: dict) -> str:
+    """The clip date and time for a file name, which cannot hold a colon: "2026-11-19 2.05 pm"."""
+    return _clipped(req).replace(":", ".")
 
 
 def build_article_note(req: dict) -> tuple[str, str]:
@@ -16,10 +30,10 @@ def build_article_note(req: dict) -> tuple[str, str]:
         ("source", page["url"]),
         ("author", page.get("author")),
         ("published", page.get("published")),
-        ("clipped", req["clippedDate"]),
+        ("clipped", _clipped(req)),
         ("tags", ["clipping"]),
     ])
-    stem = make_filename(page.get("title") or "", req["clippedDate"], req["datePosition"])
+    stem = make_filename(page.get("title") or "", _file_stamp(req), req["datePosition"])
     return stem, front + "\n" + (req.get("bodyMarkdown") or "") + "\n"
 
 
@@ -55,7 +69,7 @@ def build_video_note(
         ("channel", channel),
         ("published", published),
         ("duration", duration),
-        ("clipped", req["clippedDate"]),
+        ("clipped", _clipped(req)),
         ("transcript", kind),
         ("tags", ["clipping", "video"]),
     ])
@@ -63,7 +77,7 @@ def build_video_note(
     if description.strip():
         parts.append(f"## Description\n\n{description.strip()}")
     parts.append(f"## Transcript\n\n{transcript_text}")
-    stem = make_filename(title or "", req["clippedDate"], req["datePosition"])
+    stem = make_filename(title or "", _file_stamp(req), req["datePosition"])
     return stem, front + "\n" + "\n\n".join(parts) + "\n", kind
 
 
@@ -82,6 +96,9 @@ def _validate(req: dict) -> str | None:
         return "missing page.url"
     if not req.get("clippedDate"):
         return "missing clippedDate"
+    time = req.get("clippedTime")
+    if time is not None and not (isinstance(time, str) and _TIME.fullmatch(time)):
+        return "clippedTime must look like 14:05 or 2:05 pm"
     if req.get("datePosition") not in ("end", "start", "none"):
         return "datePosition must be end, start or none"
     return None

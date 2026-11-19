@@ -27,6 +27,7 @@ async function save(next) {
   await browser.storage.local.set({
     destinations: next.destinations,
     datePosition: next.datePosition,
+    timeFormat: next.timeFormat,
   });
   await load();
 }
@@ -95,6 +96,7 @@ function render() {
   );
   el("empty-note").hidden = settings.destinations.length > 0;
   el("date-position").value = settings.datePosition;
+  el("time-format").value = settings.timeFormat;
 }
 
 function showErrors(errors) {
@@ -145,6 +147,10 @@ el("f-cancel").addEventListener("click", resetForm);
 
 el("date-position").addEventListener("change", (event) => {
   save({ ...settings, datePosition: event.target.value });
+});
+
+el("time-format").addEventListener("change", (event) => {
+  save({ ...settings, timeFormat: event.target.value });
 });
 
 async function checkHelper() {

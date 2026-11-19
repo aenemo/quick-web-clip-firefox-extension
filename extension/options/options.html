@@ -51,14 +51,24 @@
       </div>
     </form>
 
-    <h2>Date in file name</h2>
+    <h2>Date and time in file name</h2>
     <div class="field">
-      <label for="date-position" class="visually-hidden">Date in file name</label>
+      <label for="date-position" class="visually-hidden">Date and time in file name</label>
       <select id="date-position">
         <option value="end">At the end</option>
         <option value="start">At the start</option>
         <option value="none">None</option>
       </select>
+    </div>
+
+    <h2>Time format</h2>
+    <div class="field">
+      <label for="time-format" class="visually-hidden">Time format</label>
+      <select id="time-format">
+        <option value="12h">12-hour (2:05 pm)</option>
+        <option value="24h">24-hour (14:05)</option>
+      </select>
+      <p class="hint">Used for the clip time in the note's "clipped" property and its file name. File names use a dot instead of a colon (2.05 pm, 14.05).</p>
     </div>
   </main>
   <script type="module" src="options.js"></script>

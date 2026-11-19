@@ -1,6 +1,7 @@
-export const DEFAULT_SETTINGS = { destinations: [], datePosition: "end" };
+export const DEFAULT_SETTINGS = { destinations: [], datePosition: "end", timeFormat: "12h" };
 
 const DATE_POSITIONS = ["end", "start", "none"];
+const TIME_FORMATS = ["12h", "24h"];
 
 // Exactly one default: prefer preferId, else the first flagged, else the first.
 function withSingleDefault(destinations, preferId = null) {
@@ -25,7 +26,8 @@ export function normaliseSettings(raw) {
     })),
   );
   const datePosition = DATE_POSITIONS.includes(src.datePosition) ? src.datePosition : "end";
-  return { destinations, datePosition };
+  const timeFormat = TIME_FORMATS.includes(src.timeFormat) ? src.timeFormat : "12h";
+  return { destinations, datePosition, timeFormat };
 }
 
 export function validateDestination(d) {

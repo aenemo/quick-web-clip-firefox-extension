@@ -1,6 +1,5 @@
 import { runClip } from "./lib/clip.js";
 import { buildMenuModel, normaliseSettings } from "./lib/settings.js";
-import { localDate } from "./lib/dates.js";
 
 const NATIVE_HOST = "quick_web_clip";
 const PARENT_MENU_ID = "qwc-save-to";
@@ -65,7 +64,7 @@ const deps = {
       message,
       iconUrl: "icons/icon-96.png",
     }),
-  today: () => localDate(),
+  now: () => new Date(),
 };
 
 function clip(tab, destinationId = null) {

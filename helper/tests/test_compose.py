@@ -117,3 +117,26 @@ def test_video_note_fallback_reason():
     assert 'channel: "Page Channel"' in text
     assert "## Description\n\nPage description" in text
     assert "Transcript unavailable: yt-dlp not installed" in text
+
+
+def test_clip_time_in_property_and_file_name():
+    req = article_req()
+    req["clippedTime"] = "2:05 pm"
+    stem, text = build_article_note(req)
+    assert stem == "How Rust Lifetimes Work 2026-11-05 2.05 pm"
+    assert 'clipped: "2026-11-05 2:05 pm"\n' in text
+    req["clippedTime"] = "14:05"
+    req["datePosition"] = "start"
+    stem, text = build_article_note(req)
+    assert stem == "2026-11-05 14.05 How Rust Lifetimes Work"
+    assert 'clipped: "2026-11-05 14:05"\n' in text
+
+
+def test_clip_time_is_optional_but_checked():
+    from compose import _validate
+    req = article_req()
+    req["destination"] = {"vaultPath": r"C:\Vault"}
+    assert _validate(req) is None
+    for bad in ["14:05/..", "2pm", 5, ""]:
+        req["clippedTime"] = bad
+        assert _validate(req) == "clippedTime must look like 14:05 or 2:05 pm", bad

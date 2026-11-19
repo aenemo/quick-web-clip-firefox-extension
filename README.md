@@ -7,7 +7,8 @@ A Firefox extension that saves the current page into an Obsidian vault as a Mark
 - Several destinations (vault plus subfolder) can be configured, one marked as default. The others are reached from the right-click "Save to" menu.
 - Select part of a page first to save only the selection (text and images, as they are). With nothing selected, the whole page is clipped. This suits Teams chats, where you can select just the messages you want: each message is saved under a "**Sender** date time" line.
 - Images that only the open tab can show (Microsoft Teams chat images and other `blob:` images) are saved into an `attachments` folder beside the note. Teams images also link to the original image online, which opens in a browser signed in to Teams.
-- A clip never overwrites an existing file: a duplicate name gets a number, for example `Title 2026-11-06 (2).md`.
+- The clip date and time go in the "clipped" property and the file name, for example `Title 2026-11-06 2.05 pm.md`. Choose 12-hour or 24-hour time in Options.
+- A clip never overwrites an existing file: a duplicate name gets a number, for example `Title 2026-11-06 2.05 pm (2).md`.
 
 The extension talks to a small Python helper through Firefox native messaging. The helper writes the files and calls yt-dlp for video transcripts.
 
@@ -132,13 +133,14 @@ These checks have not been run yet. They need a real Firefox, which could not be
 | YouTube in-page navigation | Open a video, click another video in the sidebar, press Alt+Shift+C | The note is for the second video | | |
 | Missing vault folder | Set a destination to a folder that does not exist, clip a page | Red `ERR` and notification "Folder not found: <path>" | | |
 | Helper not installed | Run `helper\uninstall.bat`, clip a page, then run `helper\install.bat` again | Red `ERR` and notification "Helper not found. Run install.bat in the helper folder." | | |
+| Clip time | Clip any article with Time format set to 12-hour, then again with 24-hour | First file `Title 2026-11-19 2.05 pm.md` with `clipped: "2026-11-19 2:05 pm"`; second `Title 2026-11-19 14.05.md` with `clipped: "2026-11-19 14:05"` | | |
 | about: page | Open `about:preferences`, press Alt+Shift+C | Notification "This page can't be clipped" | | |
 | Duplicate clip | Clip the same page twice | Second file has the ` (2)` suffix and the first is unchanged | | |
 | No destinations | Clear the destinations in storage, press the shortcut | The options page opens | | |
 | Options: menu list | Add two destinations, open the right-click Save to menu | Both are listed, one marked " (default)" | | |
 | Options: default and order | Switch the default, delete the default, reorder | The menu follows each change | | |
 | Options: invalid path | Enter a relative vault path | Message "Vault folder must be a full path" | | |
-| Options: helper status | Open the options page | "Helper connected (v1.2.0), yt-dlp <version>" (or "yt-dlp not installed", or "Helper not found. Run install.bat in the helper folder.") | | |
+| Options: helper status | Open the options page | "Helper connected (v1.3.0), yt-dlp <version>" (or "yt-dlp not installed", or "Helper not found. Run install.bat in the helper folder.") | | |
 | Options: persistence | Reload the extension | Settings are still present | | |
 | Teams chat with images | Open a Teams chat (teams.cloud.microsoft) that shows pasted images, press Alt+Shift+C | Images saved in `attachments` beside the note, each shown in Obsidian and linked to its `asyncgw.teams.microsoft.com` URL. No `blob:` links in the note | | |
 | Teams selection | In a Teams chat, select a few messages including an image, press Alt+Shift+C | Note holds only the selected messages. The image is saved in `attachments` and linked to its original | | |

@@ -2,7 +2,7 @@ process.env.TZ = "Australia/Sydney";
 
 import test from "node:test";
 import assert from "node:assert/strict";
-import { localDate, normalisePublished } from "../extension/lib/dates.js";
+import { localDate, localTime, normalisePublished } from "../extension/lib/dates.js";
 
 test("localDate uses local time", () => {
   assert.equal(localDate(new Date(2026, 10, 5, 23, 59)), "2026-11-05");
@@ -36,4 +36,14 @@ test("normalisePublished rejects an impossible calendar date", () => {
 
 test("normalisePublished converts a UTC time to the next local day", () => {
   assert.equal(normalisePublished("2026-03-14T23:30:00Z"), "2026-03-15");
+});
+
+test("localTime gives 12-hour time by default and 24-hour on request", () => {
+  const at = (h, m) => new Date(2026, 10, 19, h, m);
+  assert.equal(localTime(at(14, 5)), "2:05 pm");
+  assert.equal(localTime(at(0, 7), "12h"), "12:07 am");
+  assert.equal(localTime(at(12, 0), "12h"), "12:00 pm");
+  assert.equal(localTime(at(9, 30), "12h"), "9:30 am");
+  assert.equal(localTime(at(14, 5), "24h"), "14:05");
+  assert.equal(localTime(at(0, 7), "24h"), "00:07");
 });

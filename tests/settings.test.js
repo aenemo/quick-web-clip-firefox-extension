@@ -161,3 +161,9 @@ test("normaliseSettings treats a non-array destinations as empty", () => {
   assert.deepEqual(normaliseSettings({ destinations: "nope" }).destinations, []);
   assert.deepEqual(normaliseSettings({ destinations: {} }).destinations, []);
 });
+
+test("normaliseSettings keeps a known timeFormat and defaults to 12-hour", () => {
+  assert.equal(normaliseSettings({}).timeFormat, "12h");
+  assert.equal(normaliseSettings({ timeFormat: "24h" }).timeFormat, "24h");
+  assert.equal(normaliseSettings({ timeFormat: "13h" }).timeFormat, "12h");
+});

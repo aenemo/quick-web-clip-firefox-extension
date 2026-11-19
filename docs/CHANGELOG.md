@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.3.0 (19/11/2026)
+- The clip time is saved with the date: in the "clipped" property (`2026-11-19 2:05 pm`) and in the file name (`Title 2026-11-19 2.05 pm.md`). File names use a dot in place of the colon, which Windows does not allow.
+- New setting "Time format": 12-hour (2:05 pm, the default) or 24-hour (14:05).
+- New icon: a dark-edged red down arrow with "MD" in white on the same purple. The letters are drawn at each size so they stay sharp, and 16 and 32 px sizes are included for the toolbar. `design/icon-options/make_icons2.py` redraws it (option G).
+
 ## 1.2.0 (19/11/2026)
 - Clip a selection: when text or images are selected on the page, only the selection is saved, as it is (no article clean-up, and no video transcript). With nothing selected, the whole page is clipped as before. This works on any site, including Teams chats, where selected images are saved and linked to their originals.
 - The right-click "Save to" menu now also appears when right-clicking a selection or an image.

@@ -1,6 +1,6 @@
 import { normaliseSettings, getDefaultDestination } from "./settings.js";
 import { isClippable, classifyUrl } from "./classify.js";
-import { normalisePublished } from "./dates.js";
+import { localDate, localTime, normalisePublished } from "./dates.js";
 
 const HELPER_MISSING = "Helper not found. Run install.bat in the helper folder.";
 const EXTRACT_FAILED = "Could not read this page";
@@ -57,6 +57,7 @@ export async function runClip({ tab, destinationId = null }, deps) {
     // The canonical link can lag after in-page navigation (YouTube), so a video tab URL wins.
     const url = classifyUrl(tab.url, null) === "video" ? tab.url : page.url || tab.url;
 
+    const now = deps.now();
     const request = {
       v: 1,
       action: "save",
@@ -64,7 +65,8 @@ export async function runClip({ tab, destinationId = null }, deps) {
       kind: selection === true ? "article" : classifyUrl(url, ogType),
       destination: { vaultPath: dest.vaultPath, subfolder: dest.subfolder },
       datePosition: settings.datePosition,
-      clippedDate: deps.today(),
+      clippedDate: localDate(now),
+      clippedTime: localTime(now, settings.timeFormat),
       page: {
         url,
         title: page.title ?? "",

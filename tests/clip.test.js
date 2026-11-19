@@ -38,7 +38,7 @@ function makeDeps(over = {}) {
     },
     setBadge: (id, state) => calls.badge.push([id, state]),
     notify: (m) => calls.notify.push(m),
-    today: () => "2026-11-06",
+    now: () => new Date(2026, 10, 6, 14, 5),
     ...over,
   };
   return { deps, calls };
@@ -74,6 +74,7 @@ test("default destination request shape", async () => {
       destination: { vaultPath: "C:\\Work", subfolder: "Clippings" },
       datePosition: "end",
       clippedDate: "2026-11-06",
+      clippedTime: "2:05 pm",
       page: {
         url: "https://example.com/post",
         title: "A Post",
@@ -271,4 +272,13 @@ test("without a selection a video page is still a video clip", async () => {
   });
   await runClip({ tab: { id: 6, url: tabUrl } }, deps);
   assert.equal(calls.native[0].kind, "video");
+});
+
+test("the clip time follows the 24-hour setting", async () => {
+  const { deps, calls } = makeDeps();
+  const base = await deps.getSettings();
+  deps.getSettings = async () => ({ ...base, timeFormat: "24h" });
+  await runClip({ tab }, deps);
+  assert.equal(calls.native[0].clippedDate, "2026-11-06");
+  assert.equal(calls.native[0].clippedTime, "14:05");
 });
