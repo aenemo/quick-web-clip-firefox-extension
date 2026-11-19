@@ -83,6 +83,7 @@ test("default destination request shape", async () => {
         description: "Desc",
       },
       bodyMarkdown: "Body",
+      attachments: [],
     },
   ]);
   assert.equal(r.status, "ok");
@@ -242,4 +243,13 @@ test("article page keeps its canonical URL", async () => {
   await runClip({ tab: { id: 4, url: "https://example.com/post?utm=1" } }, deps);
   assert.equal(calls.native[0].kind, "article");
   assert.equal(calls.native[0].page.url, canonical);
+});
+
+test("extracted images are passed to the helper", async () => {
+  const attachments = [{ token: "qwc-attachment:0", mime: "image/jpeg", data: "AAAA" }];
+  const { deps, calls } = makeDeps({
+    extract: async () => ({ page: { url: "https://teams.cloud.microsoft/", title: "Chat" }, bodyMarkdown: "x", attachments }),
+  });
+  await runClip({ tab: { id: 5, url: "https://teams.cloud.microsoft/" } }, deps);
+  assert.deepEqual(calls.native[0].attachments, attachments);
 });

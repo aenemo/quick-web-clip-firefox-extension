@@ -1,8 +1,9 @@
 """Compose note text for article and video clips, and the save action."""
 import logging
 
+import attachments
 import transcript
-from notes import NoteError, make_filename, render_frontmatter, safe_write
+from notes import NoteError, make_filename, render_frontmatter, resolve_target, safe_write
 from transcript import Unsupported, VideoError, VideoInfo, build_paragraphs, render_transcript
 
 log = logging.getLogger("qwc.save")
@@ -98,6 +99,7 @@ def save(req: dict) -> dict:
     kind = req["kind"]
     transcript_kind = None
     warning = None
+    images = []
     try:
         if kind == "video":
             try:
@@ -110,12 +112,19 @@ def save(req: dict) -> dict:
                 warning = f"Saved without transcript: {e.reason}"
         if kind == "article":
             stem, text = build_article_note(req)
+            if req.get("attachments"):
+                target = resolve_target(dest["vaultPath"], dest.get("subfolder") or "")
+                links, images, skipped = attachments.save_attachments(target, stem, req["attachments"])
+                text = attachments.link_attachments(text, links)
+                if skipped:
+                    warning = f"Saved, but {skipped} image(s) could not be saved"
         path = safe_write(dest["vaultPath"], dest.get("subfolder") or "", stem, text)
     except NoteError as e:
+        attachments.remove_files(images)
         log.info("save url=%s kind=%s result=%s", url, kind, e.code)
         return {"ok": False, "error": e.code, "message": e.message}
 
-    log.info("save url=%s kind=%s transcript=%s result=ok", url, kind, transcript_kind)
+    log.info("save url=%s kind=%s transcript=%s images=%d result=ok", url, kind, transcript_kind, len(images))
     return {
         "ok": True,
         "path": str(path),

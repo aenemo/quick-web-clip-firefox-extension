@@ -73,11 +73,8 @@ class NoteError(Exception):
 _MAX_DUPLICATES = 99
 
 
-def safe_write(vault: str, subfolder: str, stem: str, text: str) -> str:
-    """Write text to <vault>/<subfolder>/<stem>.md without overwriting.
-
-    Returns the absolute path written. Duplicates get " (2)" to " (99)".
-    """
+def resolve_target(vault: str, subfolder: str) -> Path:
+    """Return the folder <vault>/<subfolder>, refusing a missing vault or a path outside it."""
     vault_path = Path(vault)
     if not vault_path.is_dir():
         raise NoteError("vault_not_found", f"Folder not found: {vault}")
@@ -89,6 +86,15 @@ def safe_write(vault: str, subfolder: str, stem: str, text: str) -> str:
     target = (vault_resolved / subfolder).resolve()
     if not target.is_relative_to(vault_resolved):
         raise outside
+    return target
+
+
+def safe_write(vault: str, subfolder: str, stem: str, text: str) -> str:
+    """Write text to <vault>/<subfolder>/<stem>.md without overwriting.
+
+    Returns the absolute path written. Duplicates get " (2)" to " (99)".
+    """
+    target = resolve_target(vault, subfolder)
 
     tmp_name = None
     try:

@@ -5,6 +5,7 @@ A Firefox extension that saves the current page into an Obsidian vault as a Mark
 - Articles are reduced to the main content (Readability) and converted to Markdown.
 - Videos (YouTube, Vimeo, Dailymotion, TED) are saved with details, description and a timestamped transcript, with chapter headings where the video has chapters.
 - Several destinations (vault plus subfolder) can be configured, one marked as default. The others are reached from the right-click "Save to" menu.
+- Images that only the open tab can show (Microsoft Teams chat images and other `blob:` images) are saved into an `attachments` folder beside the note. Teams images also link to the original image online, which opens in a browser signed in to Teams.
 - A clip never overwrites an existing file: a duplicate name gets a number, for example `Title 2026-11-06 (2).md`.
 
 The extension talks to a small Python helper through Firefox native messaging. The helper writes the files and calls yt-dlp for video transcripts.
@@ -136,6 +137,7 @@ These checks have not been run yet. They need a real Firefox, which could not be
 | Options: menu list | Add two destinations, open the right-click Save to menu | Both are listed, one marked " (default)" | | |
 | Options: default and order | Switch the default, delete the default, reorder | The menu follows each change | | |
 | Options: invalid path | Enter a relative vault path | Message "Vault folder must be a full path" | | |
-| Options: helper status | Open the options page | "Helper connected (v1.0.0), yt-dlp <version>" (or "yt-dlp not installed", or "Helper not found. Run install.bat in the helper folder.") | | |
+| Options: helper status | Open the options page | "Helper connected (v1.1.1), yt-dlp <version>" (or "yt-dlp not installed", or "Helper not found. Run install.bat in the helper folder.") | | |
 | Options: persistence | Reload the extension | Settings are still present | | |
+| Teams chat with images | Open a Teams chat (teams.cloud.microsoft) that shows pasted images, press Alt+Shift+C | Images saved in `attachments` beside the note, each shown in Obsidian and linked to its `asyncgw.teams.microsoft.com` URL. No `blob:` links in the note | | |
 | Options: two tabs | Open the options page in two tabs, change a setting in one | The change appears in the other | | |

@@ -28,7 +28,7 @@ def test_read_eof_returns_none():
 def test_ping_reports_version():
     r = host.handle({"v": 1, "action": "ping"})
     assert r["ok"] is True
-    assert r["version"] == "1.0.0"
+    assert r["version"] == "1.1.1"
 
 
 def test_unknown_action_bad_request():

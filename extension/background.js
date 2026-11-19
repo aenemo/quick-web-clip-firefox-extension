@@ -40,6 +40,7 @@ async function extract(tabId) {
       "vendor/Readability.js",
       "vendor/turndown.js",
       "vendor/turndown-plugin-gfm.js",
+      "content/images.js",
       "content/extract.js",
     ],
   });

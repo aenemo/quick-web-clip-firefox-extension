@@ -53,7 +53,7 @@ export async function runClip({ tab, destinationId = null }, deps) {
     } catch {
       return fail(tab, deps, EXTRACT_FAILED);
     }
-    const { page = {}, ogType = null, bodyMarkdown = "" } = extracted ?? {};
+    const { page = {}, ogType = null, bodyMarkdown = "", attachments = [] } = extracted ?? {};
     // The canonical link can lag after in-page navigation (YouTube), so a video tab URL wins.
     const url = classifyUrl(tab.url, null) === "video" ? tab.url : page.url || tab.url;
 
@@ -73,6 +73,7 @@ export async function runClip({ tab, destinationId = null }, deps) {
         description: page.description ?? "",
       },
       bodyMarkdown,
+      attachments: Array.isArray(attachments) ? attachments : [],
     };
 
     let reply;

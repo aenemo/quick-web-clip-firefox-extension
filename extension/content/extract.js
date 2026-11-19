@@ -45,20 +45,43 @@
     return out;
   };
 
-  window.__qwcExtract = () => {
+  // Fetch as the page would first (Firefox content.fetch), so Teams images use the tab's
+  // sign-in and its blob: URLs; then the content script's own fetch.
+  const pageFetchers = [];
+  if (typeof content !== "undefined" && content && typeof content.fetch === "function") {
+    pageFetchers.push(content.fetch.bind(content));
+  }
+  pageFetchers.push(fetch);
+
+  window.__qwcExtract = async () => {
+    const images = globalThis.__qwcImages;
+    const prepared = document.cloneNode(true);
+    try {
+      images.resolveTeamsImages(prepared, performance.getEntriesByType("resource").map((e) => e.name));
+    } catch {
+      // Images keep their page URLs.
+    }
+
     let article = null;
     try {
-      article = new Readability(document.cloneNode(true)).parse();
+      article = new Readability(prepared.cloneNode(true)).parse();
     } catch {
       article = null;
     }
 
-    const html = article && article.content && article.content.trim() ? article.content : document.body.innerHTML;
+    const html = article && article.content && article.content.trim() ? article.content : prepared.body.innerHTML;
 
     // Parse into an inert document (no script execution, no resource loading).
     const container = new DOMParser().parseFromString(html, "text/html").body;
     for (const img of container.querySelectorAll("img[src]")) img.setAttribute("src", abs(img.getAttribute("src")));
     for (const a of container.querySelectorAll("a[href]")) a.setAttribute("href", abs(a.getAttribute("href")));
+
+    let attachments = [];
+    try {
+      attachments = await images.collectAttachments(container, pageFetchers);
+    } catch {
+      attachments = [];
+    }
 
     const td = new TurndownService({ headingStyle: "atx", codeBlockStyle: "fenced", bulletListMarker: "-" });
     td.use(turndownPluginGfm.gfm);
@@ -85,6 +108,6 @@
         (article && article.excerpt) || meta('meta[property="og:description"]') || meta('meta[name="description"]'),
     };
 
-    return { page, ogType: meta('meta[property="og:type"]') || null, bodyMarkdown };
+    return { page, ogType: meta('meta[property="og:type"]') || null, bodyMarkdown, attachments };
   };
 })();
